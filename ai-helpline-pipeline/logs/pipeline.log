@@ -219,3 +219,256 @@
 2025-09-23 01:13:53,094 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/21m00Tcm4TlvDq8ikWAM HTTP/1.1" 200 None
 2025-09-23 01:13:53,668 - INFO - Audio file created: response.wav (945886 bytes)
 2025-09-23 01:13:53,668 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-23 02:27:17,645 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 02:27:17,646 - INFO - Input file: Sample2.wav
+2025-09-23 02:27:17,646 - INFO - Step 1: Converting speech to text...
+2025-09-23 02:27:17,649 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 02:27:21,046 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 02:27:21,049 - INFO - Transcribed text: मैं अपनी फसल की उपज कैसे बढ़ा सकता हूं? मैं उत्तर प्रदेश में सितंबर में गेहूं उगा रहा हूं।
+2025-09-23 02:27:21,049 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 02:27:21,049 - INFO - Step 3: Processing query with LLM...
+2025-09-23 02:27:21,051 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 02:27:22,027 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 02:27:22,029 - INFO - LLM response: उत्तर प्रदेश में सितंबर में गेहूं उगाने के लिए कुछ सुझाव:
+
+1. **सही बीज का चयन**: उच्च गुणवत्ता वाले बीज का चयन करें जो आपके क्षेत्र के लिए उपयुक्त हों।
+2. **सही बीज की मात्रा**: बीज की मात्रा को सही तरीके से निर्धारित करें ताकि प्रति एकड़ 15-20 किलोग्राम बीज का उपयोग किया जा सके।
+3. **सही समय का चयन**: सितंबर में गेहूं की बुवाई करने से पहले मिट्टी को अच्छी तरह से तैयार करें और बुवाई के लिए सही समय का चयन करें।
+4. **पर्याप्त पानी**: गेहूं की आवश्यकता होती है 400-500 मिमी पानी की बारिश के बाद। सुनिश्चित करें कि आपके क्षेत्र में पर्याप्त पानी उपलब्ध है।
+5. **नियमित खाद और उर्वरक**: गेहूं की आवश्यकता होती है नियमित खाद और उर्वरक के साथ। सुनिश्चित करें कि आप नियमित रूप से खाद और उर्वरक का उपयोग करें।
+6. **कीट और रोग प्रबंधन**: गेहूं के कीट और रोगों से बचाव के लिए नियमित रूप से जांच करें और यदि आवश्यक हो तो कीटनाशकों का उपयोग करें।
+7. **सही फसल प्रबंधन**: गेहूं की फसल को सही तरीके से प्रबंधित करें और नियमित रूप से जांच करें कि फसल स्वस्थ और स्वस्थ है या नहीं।
+
+इन सुझावों का पालन करके, आप अपनी फसल की उपज को बढ़ा
+2025-09-23 02:27:22,029 - INFO - Step 5: Converting text to speech...
+2025-09-23 02:27:23,653 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 02:27:37,276 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/21m00Tcm4TlvDq8ikWAM HTTP/1.1" 200 None
+2025-09-23 02:27:37,893 - INFO - Audio file created: response.wav (1255594 bytes)
+2025-09-23 02:27:37,893 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-23 12:21:07,114 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 12:21:07,114 - INFO - Input file: Sample1.wav
+2025-09-23 12:21:07,114 - INFO - Step 1: Converting speech to text...
+2025-09-23 12:21:07,117 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 12:30:50,027 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 12:30:50,027 - INFO - Input file: Sample1.wav
+2025-09-23 12:30:50,027 - INFO - Step 1: Converting speech to text...
+2025-09-23 12:30:50,030 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 12:30:55,276 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 12:30:55,279 - INFO - Transcribed text: ਮੈਂ ਆਪਣੀ ਫਸਲ ਦੀ ਪੈਦਾਵਾਰ ਕਿਵੇਂ ਵਧਾ ਸਕਦਾ ਹਾਂ? ਮੈਂ ਸਤੰਬਰ ਦੌਰਾਨ ਅੰਮ੍ਰਿਤਸਰ ਵਿੱਚ ਕਣਕ ਉਗਾ ਰਿਹਾ ਹਾਂ।
+2025-09-23 12:30:55,279 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 12:30:55,279 - INFO - Step 3: Processing query with LLM...
+2025-09-23 12:30:55,281 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 12:30:56,401 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 12:30:56,403 - INFO - LLM response: ਸਤੰਬਰ ਦੌਰਾਨ ਅੰਮ੍ਰਿਤਸਰ ਵਿੱਚ ਕਣਕ ਉਗਾਉਣ ਲਈ ਕੁਝ ਸਲਾਹਾਂ ਇਹਨਾਂ ਹਨ:
+
+1. **ਸਿਹਤਮੰਦ ਮਿੱਟੀ**: ਕਣਕ ਦੇ ਲਈ ਸਿਹਤਮੰਦ ਮਿੱਟੀ ਬਹੁਤ ਜ਼ਰੂਰੀ ਹੈ। ਮਿੱਟੀ ਦੀ ਪਹੁੰਚ ਦੀ ਜਾਂਚ ਕਰਕੇ ਇਸਦੀ ਗੁਣਵੱਤਾ ਨੂੰ ਸੁਧਾਰਨ ਲਈ ਕੋਈ ਕਾਰਵਾਈ ਕਰੋ।
+
+2. **ਸਮਾਂ-ਸਾਰਿਆ ਸਿੰਚਾਈ**: ਕਣਕ ਦੇ ਲਈ ਸਮਾਂ-ਸਾਰਿਆ ਸਿੰਚਾਈ ਬਹੁਤ ਜ਼ਰੂਰੀ ਹੈ। ਸਿੰਚਾਈ ਤੋਂ ਪਹਿਲਾਂ ਮਿੱਟੀ ਦੀ ਪਹੁੰਚ ਦੀ ਜਾਂਚ ਕਰੋ ਅਤੇ ਸਿੰਚਾਈ ਦੇ ਦੌਰਾਨ
+2025-09-23 12:30:56,403 - INFO - Step 5: Converting text to speech...
+2025-09-23 12:30:56,404 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 12:31:01,639 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/21m00Tcm4TlvDq8ikWAM HTTP/1.1" 200 None
+2025-09-23 12:31:01,892 - INFO - Audio file created: response.wav (499924 bytes)
+2025-09-23 12:31:01,893 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-23 12:32:03,739 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 12:32:03,739 - INFO - Input file: Sample2.wav
+2025-09-23 12:32:03,739 - INFO - Step 1: Converting speech to text...
+2025-09-23 12:32:03,743 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 12:32:05,924 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 12:32:05,927 - INFO - Transcribed text: मैं अपनी फसल की उपज कैसे बढ़ा सकता हूं? मैं उत्तर प्रदेश में सितंबर में गेहूं उगा रहा हूं।
+2025-09-23 12:32:05,927 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 12:32:05,927 - INFO - Step 3: Processing query with LLM...
+2025-09-23 12:32:05,929 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 12:32:06,946 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 12:32:06,948 - INFO - LLM response: उत्तर प्रदेश में सितंबर में गेहूं उगाने के लिए कुछ सुझाव:
+
+1. **सही बीज का चयन**: उच्च गुणवत्ता वाले बीज का चयन करें जो आपके क्षेत्र की जलवायु और मिट्टी के अनुसार हो।
+2. **सही बीज की मात्रा**: बीज की मात्रा को सही तरीके से निर्धारित करें ताकि प्रति एकड़ 15-20 किलोग्राम बीज का उपयोग किया जा सके।
+3. **सही फसल चक्र**: गेहूं के लिए 20-25 सेमी की गहराई पर 20-25 सेमी की दूरी पर बुवाई करें।
+4. **पानी का प्रबंधन**: गेहूं को 20-25 सेमी की गहराई पर पानी दें, और फिर 7-10 दिनों के अंतराल पर पानी दें।
+5. **खाद और उर्वरक**: गेहूं के लिए 20-25 किलोग्राम नाइट्रोजन, 15-20 किलोग्राम फॉस्फोरस, और 10-15 किलोग्राम पोटाश का उपयोग करें।
+6. **कीट और रोग प्रबंधन**: गेहूं के कीट और रोगों से बचाव के लिए नियमित रूप से जांच करें और आवश्यकतानुसार कार्रवाई करें।
+7. **सही समय की बुवाई**: गेहूं की बुवाई के लिए सितंबर के पहले सप्ताह में बुवाई करना सबसे अच्छा होता है।
+
+इन सुझावों का पालन करके, आप अपनी फसल की उपज को बढ़ा सकते हैं और अपने खेत की उत्पादकता को बढ़ा सकते हैं।
+2025-09-23 12:32:06,949 - INFO - Step 5: Converting text to speech...
+2025-09-23 12:32:09,746 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 12:32:21,500 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/21m00Tcm4TlvDq8ikWAM HTTP/1.1" 200 None
+2025-09-23 12:32:21,898 - INFO - Audio file created: response.wav (1162807 bytes)
+2025-09-23 12:32:21,898 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-23 13:22:03,181 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 13:22:03,181 - INFO - Input file: Sample2.wav
+2025-09-23 13:22:03,181 - INFO - Step 1: Converting speech to text...
+2025-09-23 13:22:03,185 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 13:22:04,773 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 13:22:04,774 - INFO - Transcribed text: मैं अपनी फसल की उपज कैसे बढ़ा सकता हूं? मैं उत्तर प्रदेश में सितंबर में गेहूं उगा रहा हूं।
+2025-09-23 13:22:04,775 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 13:22:04,775 - INFO - Step 3: Processing query with LLM...
+2025-09-23 13:22:04,776 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 13:22:06,771 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 13:22:06,773 - INFO - LLM response: उत्तर प्रदेश में सितंबर में गेहूं उगाना एक अच्छा विकल्प है। अपनी फसल की उपज बढ़ाने के लिए निम्नलिखित सुझावों का पालन करें:
+
+1. **सही बीज का चयन**: उच्च गुणवत्ता वाले बीज का चयन करें जो आपके क्षेत्र के लिए अनुकूल हों।
+2. **सही खाद और उर्वरक**: गेहूं के लिए नाइट्रोजन, फॉस्फोरस और पोटाश जैसे उर्वरकों का उपयोग करें। खाद के रूप में कम्पोस्ट या गोबर की खाद का उपयोग करें।
+3. **सही जलवायु**: गेहूं को 18-22°C के तापमान में उगाना सबसे अच्छा है।
+4. **सही पानी**: गेहूं को 6-8 सेमी पानी की आवश्यकता होती है।
+5. **कीट और रोग नियंत्रण**: गेहूं के कीट और रोगों से बचाव के लिए नियमित रूप से जांच करें और आवश्यकतानुसार उपचार करें।
+6. **सही फसल चक्र**: गेहूं के बाद में मूंग, चावल या ज्वार जैसी फसलों को उगाने से फसल चक्र में विविधता आती है और उपज बढ़ती है।
+
+इन सुझावों का पालन करके, आप अपनी फसल की उपज बढ़ा सकते हैं और अपने क्षेत्र में उत्पादन में सुधार कर सकते हैं।
+2025-09-23 13:22:06,775 - INFO - Step 5: Converting text to speech...
+2025-09-23 13:22:09,189 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 13:22:20,368 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/21m00Tcm4TlvDq8ikWAM HTTP/1.1" 200 None
+2025-09-23 13:22:20,744 - INFO - Audio file created: response.wav (1049122 bytes)
+2025-09-23 13:22:20,744 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-23 15:57:58,877 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 15:57:58,877 - INFO - Input file: Agrow.wav
+2025-09-23 15:57:58,877 - INFO - Step 1: Converting speech to text...
+2025-09-23 15:57:58,881 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 15:58:08,246 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 15:58:08,249 - INFO - Transcribed text: हैलो सस्त्री काल जी मुझे पूछना था कि अब कौन सा सीजन है लगाने के लिए? धान लगाना है या गेहूं और बादल या मौसम की क्या संभावना है? बादल ज्यादा तो नहीं आएंगे।
+2025-09-23 15:58:08,249 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 15:58:08,249 - INFO - Step 3: Processing query with LLM...
+2025-09-23 15:58:08,251 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 15:58:09,228 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 15:58:09,230 - INFO - LLM response: नमस्ते! आपके क्षेत्र के लिए मैं कुछ सामान्य जानकारी दे सकता हूँ। भारत में धान और गेहूं के लिए दो मुख्य सीजन होते हैं:
+
+1. **दक्षिण-पश्चिम मानसून सीजन** (जून से सितंबर): इस सीजन में दक्षिण-पश्चिम मानसून के आगमन के साथ धान की फसल लगाई जा सकती है।
+2. **उत्तर-पूर्व मानसून सीजन** (अक्टूबर से दिसंबर): इस सीजन में गेहूं की फसल लगाई जा सकती है।
+
+अब, आपके क्षेत्र के लिए मौसम की संभावना का अनुमान लगाना मुश्किल है, लेकिन मैं कुछ सामान्य सुझाव दे सकता हूँ:
+
+* **बादलों की संभावना**: यदि आपके क्षेत्र में दक्षिण-पश्चिम मानसून का आगमन हो रहा है, तो बादलों की संभावना अधिक हो सकती है।
+* **मौसम की संभावना**: यदि आपके क्षेत्र में मानसून का आगमन हो रहा है, तो मौसम में बदलाव आ सकता है, जिससे तापमान में कमी और वर्षा हो सकती है।
+
+कृपया अपने क्षेत्र के मौसम पूर्वानुमान की जांच करें और अपने खेत की स्थिति के अनुसार फसल का चयन करें।
+2025-09-23 15:58:09,230 - INFO - Step 5: Converting text to speech...
+2025-09-23 15:58:09,232 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 15:58:19,982 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/21m00Tcm4TlvDq8ikWAM HTTP/1.1" 200 None
+2025-09-23 15:58:20,457 - INFO - Audio file created: response.wav (984338 bytes)
+2025-09-23 15:58:20,457 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-23 16:00:11,108 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 16:00:11,108 - INFO - Input file: Sample1.wav
+2025-09-23 16:00:11,108 - INFO - Step 1: Converting speech to text...
+2025-09-23 16:00:11,112 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 16:00:13,962 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 16:00:13,964 - INFO - Transcribed text: ਮੈਂ ਆਪਣੀ ਫਸਲ ਦੀ ਪੈਦਾਵਾਰ ਕਿਵੇਂ ਵਧਾ ਸਕਦਾ ਹਾਂ? ਮੈਂ ਸਤੰਬਰ ਦੌਰਾਨ ਅੰਮ੍ਰਿਤਸਰ ਵਿਚ ਕਣਕ ਉਗਾ ਰਿਹਾ ਹਾਂ।
+2025-09-23 16:00:13,965 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 16:00:13,965 - INFO - Step 3: Processing query with LLM...
+2025-09-23 16:00:13,967 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 16:00:14,791 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 16:00:14,793 - INFO - LLM response: ਸਤੰਬਰ ਦੌਰਾਨ ਅੰਮ੍ਰਿਤਸਰ ਵਿਚ ਕਣਕ ਉਗਾਉਣ ਲਈ ਕੁਝ ਸਲਾਹ ਇਹ ਹੈ:
+
+1. **ਪੌਸ਼ਟਿਕ ਤੱਤਾਂ ਦੀ ਪੂਰਤੀ**: ਕਣਕ ਲਈ ਨਾਈਟ੍ਰੋਜਨ, ਫਾਸਫੋਰਸ, ਪੋਟਾਸ਼ੀਅਮ ਆਦਿ ਦੀ ਪੂਰਤੀ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ। ਇਹ ਤੱਤ ਕੀੜੇ-ਮਕੌੜੇ ਅਤੇ ਬੀਜਾਣੂਆਂ ਦੁਆਰਾ ਖਾਧੇ ਜਾਂਦੇ ਹਨ।
+
+2. **ਸਿੱਧੇ ਰੂਪ ਵਿਚ ਪਾਣੀ ਦੀ ਪ੍ਰਾਪਤੀ**: ਕਣਕ ਲਈ ਸਿੱਧੇ ਰੂਪ ਵਿਚ ਪਾਣੀ ਦੀ ਪ੍ਰਾਪਤੀ ਬਹੁਤ ਜ਼ਰੂਰੀ ਹੈ। ਪਾਣੀ ਦੀ ਕਮੀ ਕਣਕ ਦੀ ਪੈਦਾਵਾਰ ਨੂੰ ਪ੍ਰਭ
+2025-09-23 16:00:14,794 - INFO - Step 5: Converting text to speech...
+2025-09-23 16:00:17,111 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 16:00:22,905 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/21m00Tcm4TlvDq8ikWAM HTTP/1.1" 200 None
+2025-09-23 16:00:23,372 - INFO - Audio file created: response.wav (534196 bytes)
+2025-09-23 16:00:23,372 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-23 21:56:55,679 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 21:56:55,679 - INFO - Input file: Sample1.wav
+2025-09-23 21:56:55,679 - INFO - Step 1: Converting speech to text...
+2025-09-23 21:56:55,683 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 21:57:01,804 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 21:57:01,806 - INFO - Transcribed text: ਮੈਂ ਆਪਣੀ ਫਸਲ ਦੀ ਪੈਦਾਵਾਰ ਕਿਵੇਂ ਵਧਾ ਸਕਦਾ ਹਾਂ? ਮੈਂ ਸਤੰਬਰ ਦੌਰਾਨ ਅੰਮ੍ਰਿਤਸਰ ਵਿੱਚ ਕਣਕ ਉਗਾ ਰਿਹਾ ਹਾਂ।
+2025-09-23 21:57:01,807 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 21:57:01,807 - INFO - Step 3: Processing query with LLM...
+2025-09-23 21:57:01,808 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 21:57:02,745 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 21:57:02,747 - INFO - LLM response: ਸਤੰਬਰ ਦੌਰਾਨ ਅੰਮ੍ਰਿਤਸਰ ਵਿੱਚ ਕਣਕ ਉਗਾਉਣ ਲਈ ਕੁਝ ਸਲਾਹਾਂ:
+
+1. **ਪੌਸ਼ਟਿਕ ਤੱਤਾਂ ਦੀ ਪੂਰਤੀ**: ਕਣਕ ਲਈ ਨਾਈਟ੍ਰੋਜਨ, ਫਾਸਫੋਰਸ, ਪੋਟਾਸ਼ੀਅਮ, ਕੈਲਸ਼ੀਅਮ ਆਦਿ ਦੀ ਪੂਰਤੀ ਕਰੋ।
+2. **ਪਾਣੀ ਦੀ ਪ੍ਰਾਪਤੀ**: ਕਣਕ ਦੇ ਲਈ ਪਾਣੀ ਦੀ ਪ੍ਰਾਪਤੀ ਮਹੱਤਵਪੂਰਨ ਹੈ। ਪਾਣੀ ਦੀ ਪ੍ਰਾਪਤੀ ਵਧਾਉਣ ਲਈ ਕੁੱਝ ਸਲਾਹਾਂ ਹਨ:
+ * ਪਾਣੀ ਦੀ ਸੰਭਾਲ ਕਰੋ।
+ * ਪਾਣੀ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਸਿੰਚਾਈ ਸਿਸਟਮ ਦੀ ਵਰਤੋਂ ਕਰੋ।
+3. **ਕੀਮਤੀ ਬ
+2025-09-23 21:57:02,747 - INFO - Step 5: Converting text to speech...
+2025-09-23 21:57:02,749 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 21:57:08,806 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/21m00Tcm4TlvDq8ikWAM HTTP/1.1" 200 None
+2025-09-23 21:57:08,954 - INFO - Audio file created: response.wav (488221 bytes)
+2025-09-23 21:57:08,954 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-23 23:38:44,416 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 23:38:44,416 - INFO - Input file: Sample2.wav
+2025-09-23 23:38:44,416 - INFO - Step 1: Converting speech to text...
+2025-09-23 23:38:44,420 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 23:38:46,075 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 23:38:46,077 - INFO - Transcribed text: मैं अपनी फसल की उपज कैसे बढ़ा सकता हूं? मैं उत्तर प्रदेश में सितंबर में गेहूं उगा रहा हूं।
+2025-09-23 23:38:46,077 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 23:38:46,077 - INFO - Step 3: Processing query with LLM...
+2025-09-23 23:38:46,079 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 23:38:47,965 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 23:38:47,966 - INFO - LLM response: उत्तर प्रदेश में सितंबर में गेहूं उगाने के लिए कुछ सुझाव:
+
+1. **सही बीज का चयन**: उच्च गुणवत्ता वाले बीज का चयन करें जो आपके क्षेत्र के जलवायु और मिट्टी के अनुसार हो।
+2. **मिट्टी की तैयारी**: गेहूं के लिए अच्छी तरह से तैयार मिट्टी की आवश्यकता होती है। मिट्टी को अच्छी तरह से जोतें और कार्बनिक खाद जैसे कि कम्पोस्ट या गोबर की खाद का उपयोग करें।
+3. **सही बुआई**: गेहूं की बुआई के लिए सही समय और तापमान का चयन करें। सितंबर में उत्तर प्रदेश में गेहूं की बुआई के लिए सबसे अच्छा समय है।
+4. **पानी का प्रबंधन**: गेहूं के लिए पर्याप्त पानी की आवश्यकता होती है। लेकिन अधिक पानी का उपयोग करने से बचें। पानी का प्रबंधन करने के लिए सिंचाई प्रणाली का उपयोग करें।
+5. **खाद और उर्वरक**: गेहूं के लिए उचित खाद और उर्वरक का उपयोग करें। नाइट्रोजन, फॉस्फोरस और पोटाश जैसे पोषक तत्वों का उपयोग करें।
+6. **बीमारियों और कीटों से बचाव**: गेहूं की बीमारियों और कीटों से बचाव के लिए उचित उपचार का उपयोग करें।
+
+इन सुझावों का पालन करके, आप अपनी फसल की उपज को बढ़ा सकते हैं और अपने क्षेत्र में अच्छा उत्पादन प्राप्त कर सकते हैं।
+2025-09-23 23:38:47,966 - INFO - Step 5: Converting text to speech...
+2025-09-23 23:38:50,420 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 23:39:08,758 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/iWNf11sz1GrUE4ppxTOL HTTP/1.1" 200 None
+2025-09-23 23:39:09,768 - INFO - Audio file created: response.wav (1261027 bytes)
+2025-09-23 23:39:09,768 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-23 23:39:35,054 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 23:39:35,054 - INFO - Input file: Sample1.wav
+2025-09-23 23:39:35,054 - INFO - Step 1: Converting speech to text...
+2025-09-23 23:39:35,058 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 23:39:37,987 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 23:39:37,989 - INFO - Transcribed text: ਮੈਂ ਆਪਣੀ ਫਸਲ ਦੀ ਪੈਦਾਵਾਰ ਕਿਵੇਂ ਵਧਾ ਸਕਦਾ ਹਾਂ? ਮੈਂ ਸਤੰਬਰ ਦੌਰਾਨ ਅੰਮ੍ਰਿਤਸਰ ਵਿਚ ਕਣਕ ਉਗਾ ਰਿਹਾ ਹਾਂ।
+2025-09-23 23:39:37,989 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 23:39:37,989 - INFO - Step 3: Processing query with LLM...
+2025-09-23 23:39:37,991 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 23:39:39,098 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 23:39:39,100 - INFO - LLM response: ਸਤੰਬਰ ਦੌਰਾਨ ਅੰਮ੍ਰਿਤਸਰ ਵਿਚ ਕਣਕ ਉਗਾਉਣ ਲਈ ਕੁਝ ਸਲਾਹਾਂ ਹੇਠ ਲਿਖੀਆਂ ਹਨ:
+
+1. **ਸਿਹਤਮੰਦ ਬੀਜਾਂ ਦੀ ਵਰਤੋਂ**: ਸਿਹਤਮੰਦ ਬੀਜ ਆਪਣੀ ਫਸਲ ਦੀ ਪੈਦਾਵਾਰ ਵਿਚ ਵਾਧਾ ਕਰਨ ਲਈ ਅਤੇ ਬਿਮਾਰੀਆਂ ਤੋਂ ਬਚਣ ਲਈ ਬਹੁਤ ਮਹੱਤਵਪੂਰਨ ਹੈ।
+2. **ਪੌਸ਼ਟਿਕ ਧੁਰਾਂ ਦੀ ਵਰਤੋਂ**: ਪੌਸ਼ਟਿਕ ਧੁਰਾਂ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਆਪਣੀ ਫਸਲ ਨੂੰ ਪੌਸ਼ਟਿਕ ਤੱਤਾਂ ਦੀ ਪੂਰਤੀ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।
+3. **ਸਿੱਧਾ ਰਿਆਇਤ ਦਾ ਪਾਣੀ**: ਸਿੱਧਾ ਰ
+2025-09-23 23:39:39,100 - INFO - Step 5: Converting text to speech...
+2025-09-23 23:39:41,061 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 23:39:47,620 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/iWNf11sz1GrUE4ppxTOL HTTP/1.1" 200 None
+2025-09-23 23:39:47,995 - INFO - Audio file created: response.wav (468159 bytes)
+2025-09-23 23:39:47,995 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-23 23:48:19,538 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 23:48:19,538 - INFO - Input file: Sample3.wav
+2025-09-23 23:48:19,538 - INFO - Step 1: Converting speech to text...
+2025-09-23 23:48:19,542 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 23:48:23,623 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 23:48:23,626 - INFO - Transcribed text: வணக்கம். "என் தக்காளி இலைகளில் அடிப்பகுதியில் பழுப்பு நிற புள்ளிகள் தோன்றி, அவற்றைச் சுற்றி மஞ்சள் நிற ஒளிவட்டங்கள் உள்ளன. இது என்ன நோய்? இதை நிறுத்த என்ன மருந்து போட வேண்டும்?"
+2025-09-23 23:48:23,626 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 23:48:23,626 - INFO - Step 3: Processing query with LLM...
+2025-09-23 23:48:23,628 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 23:48:24,930 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 23:48:24,932 - INFO - LLM response: வணக்கம். உங்கள் தக்காளி இலைகளில் பழுப்பு நிற புள்ளிகள் தோன்றுவது மற்றும் அவற்றைச் சுற்றி மஞ்சள் நிற ஒளிவட்டங்கள் உள்ளது என்பது தக்காளி புள்ளி நோய் (தக்காளி பாக்டீரியா ரோஜாசியே) ஆகும்.
+
+இந்த நோயை நிறுத்த கீழ்க்காணும் மருந்துகளை பயன்படுத்தலாம்:
+
+1. கார்போதியான் (கார்போதியான் மெத்தைல் பாக்டீரியா என்றும் அழைக்கப்படுகிறது) - இது தக்காளி புள்ளி நோயை எதிர்க்கும் ஒரு பாக்டீரியா ஆகும்.
+2. பிளா
+2025-09-23 23:48:24,932 - INFO - Step 5: Converting text to speech...
+2025-09-23 23:48:25,543 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 23:48:25,897 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/iWNf11sz1GrUE4ppxTOL HTTP/1.1" 401 None
+2025-09-23 23:54:03,726 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-23 23:54:03,726 - INFO - Input file: Sample3.wav
+2025-09-23 23:54:03,726 - INFO - Step 1: Converting speech to text...
+2025-09-23 23:54:03,730 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 23:54:07,710 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-09-23 23:54:07,713 - INFO - Transcribed text: வணக்கம். "என் தக்காளி இலைகளில் அடிப்பகுதியில் பழுப்பு நிற புள்ளிகள் தோன்றி அவற்றைச் சுற்றி மஞ்சள் நிற ஒளிவட்டங்கள் உள்ளன. இது என்ன நோய்? இதை நிறுத்த என்ன மருந்து போட வேண்டும்?"
+2025-09-23 23:54:07,713 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-23 23:54:07,713 - INFO - Step 3: Processing query with LLM...
+2025-09-23 23:54:07,715 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-09-23 23:54:08,603 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-09-23 23:54:08,604 - INFO - LLM response: வணக்கம். தக்காளி இலைகளில் பழுப்பு நிற புள்ளிகள் மற்றும் மஞ்சள் நிற ஒளிவட்டங்கள் தோன்றுவது பொதுவாக தக்காளி நோய் என்று அழைக்கப்படும் திருப்புத் தண்டு நோயால் (டி.எம்.வி.) ஏற்படும். இந்த நோய் பாக்டீரியா மூலம் பரவுகிறது.
+
+இந்த நோயை நிறுத்த பின்வரும் மருந்துகளைப் பயன்படுத்தலாம்:
+
+1. கொப்பரை எண்ணெய் (காப்ரா) - இலைகளில் கொப்பரை எண்ணெய் தேய்க்கவும், தண்ணீர் தேய்க்கவும் செய்து விட்டு மீண்டும் த
+2025-09-23 23:54:08,605 - INFO - Step 5: Converting text to speech...
+2025-09-23 23:54:09,733 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-09-23 23:54:17,210 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/iWNf11sz1GrUE4ppxTOL HTTP/1.1" 200 None
+2025-09-23 23:54:17,372 - INFO - Audio file created: response.wav (363251 bytes)
+2025-09-23 23:54:17,372 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav

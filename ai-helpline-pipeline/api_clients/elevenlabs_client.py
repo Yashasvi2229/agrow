@@ -26,7 +26,7 @@ class ElevenLabsClient:
         # Store model/voice configs for easier access
         self._stt_model = getattr(config.models, "elevenlabs_stt_model", "scribe_v1")
         self._tts_model = getattr(config.models, "elevenlabs_tts_model", "eleven_multilingual_v2")
-        self._default_voice_id = getattr(config.models, "elevenlabs_tts_voice_id", "21m00Tcm4TlvDq8ikWAM")  # Default to 'Rachel'
+        self._default_voice_id = getattr(config.models, "elevenlabs_tts_voice_id", "iWNf11sz1GrUE4ppxTOL")  # Default to 'Rachel'
 
     def _throttle(self) -> None:
         if self._rate_per_min <= 0:
