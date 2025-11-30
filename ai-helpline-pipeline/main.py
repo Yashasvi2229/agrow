@@ -3,8 +3,12 @@ import logging
 import os
 from pathlib import Path
 
-from .config import load_config
-from .pipeline import HelplinePipeline
+try:
+    from .config import load_config
+    from .pipeline import HelplinePipeline
+except ImportError:
+    from config import load_config
+    from pipeline import HelplinePipeline
 
 
 def setup_logging(verbose: bool, logs_dir: Path) -> None:

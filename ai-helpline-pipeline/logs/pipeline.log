@@ -472,3 +472,114 @@
 2025-09-23 23:54:17,210 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/iWNf11sz1GrUE4ppxTOL HTTP/1.1" 200 None
 2025-09-23 23:54:17,372 - INFO - Audio file created: response.wav (363251 bytes)
 2025-09-23 23:54:17,372 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-24 02:01:26,875 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-24 02:01:26,875 - INFO - Input file: Sample2.wav
+2025-09-24 02:01:26,875 - INFO - Step 1: Converting speech to text...
+2025-09-24 02:01:29,650 - INFO - Transcribed text: मैं अपनी फसल की उपज कैसे बढ़ा सकता हूं? मैं उत्तर प्रदेश में सितंबर में गेहूं उगा रहा हूं।
+2025-09-24 02:01:29,650 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-24 02:01:29,650 - INFO - Step 3: Processing query with LLM...
+2025-09-24 02:01:30,612 - INFO - LLM response: उत्तर प्रदेश में सितंबर में गेहूं उगाना एक अच्छा विकल्प है। अपनी फसल की उपज बढ़ाने के लिए निम्नलिखित सुझावों पर विचार करें:
+
+1. **नमी और पोषक तत्व**: गेहूं के लिए 25-30 सेमी पानी की आवश्यकता होती है। सुनिश्चित करें कि आपकी मिट्टी में पर्याप्त नमी है और पोषक तत्वों की आपूर्ति करें।
+2. **सही बीज का चयन**: उच्च गुणवत्ता वाले बीज का चयन करें जो आपके क्षेत्र के लिए उपयुक्त हों।
+3. **सही बुआई का समय**: सितंबर में गेहूं की बुआई करने से पहले मौसम की भविष्यवाणी करें और बुआई का समय चुनें जब मौसम सूखा और शांत हो।
+4. **सही खाद और उर्वरक**: गेहूं के लिए नाइट्रोजन, फॉस्फोरस और पोटाश जैसे पोषक तत्वों की आवश्यकता होती है। अपने खेत में खाद और उर्वरक का उपयोग करें।
+5. **प्राकृतिक खाद**: गोबर की खाद, कम्पोस्ट खाद और जैविक खाद का उपयोग करके अपने खेत की मिट्टी को स्वस्थ बनाएं।
+6. **कीट और रोग नियंत्रण**: गेहूं के कीट और रोगों से बचाव के लिए नियमित रूप से जांच करें और आवश्यकतानुसार उपचार करें।
+7. **सही फसल प्रबंधन**: गेहूं की फसल को सही तरीके से प्रबंधित करें और नियमित रूप से जांच करें कि फसल कैसे विकसित हो रही है।
+
+इन स
+2025-09-24 02:01:30,612 - INFO - Step 5: Converting text to speech...
+2025-09-24 02:01:49,491 - INFO - Audio file created: response.wav (1262281 bytes)
+2025-09-24 02:01:49,492 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-24 09:55:33,268 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-24 09:55:33,268 - INFO - Input file: Sample4.wav
+2025-09-24 09:55:33,268 - INFO - Step 1: Converting speech to text...
+2025-09-24 09:55:35,362 - INFO - Transcribed text: مجھے جاننا ہے کہ الگ الگ طریقے کے فصل ہم کب اگاتے ہیں اور کیسے اگاتے ہیں، اور کیا کیا مجھے چاہیے ہو گا اگانے کے لیے۔
+2025-09-24 09:55:35,362 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-24 09:55:35,362 - INFO - Step 3: Processing query with LLM...
+2025-09-24 09:55:36,640 - INFO - LLM response: بھارت میں مختلف فصلوں کے لیے مختلف موسمی حالات ہوتے ہیں۔ یہاں کچھ اہم فصلوں کے لیے موسمی حالات اور اگنے کے طریقے کے بارے میں معلومات دی گئی ہیں:
+
+1. **موسم:** بھارت میں سال کے مختلف موسموں میں مختلف فصلوں کو اگایا جاتا ہے۔
+ * **خرداد (جولائی - اگست):** گندم، جوار، چاول، اور دیگر فصلوں کے لیے موسمی حالات اچھے ہوتے ہیں۔
+ * **آسمان (ستمبر - اکتوبر):** گندم، جوار، چاول، اور دیگر فصلوں کے لیے موسمی حالات اچھے ہوتے ہیں۔
+ * **مہر (نومبر - دسمبر):** گندم، جوار، چاول، اور دیگر فصلوں کے لیے موسمی حالات اچھے ہوتے ہیں۔
+ * **پھاگن (جنوری - فروری):** گندم، جوار، چاول، اور دیگر فصلوں کے لیے موسمی حالات اچھے ہوتے ہیں۔
+
+2. **فصلیں:** بھارت میں مختلف فصلوں کے لیے مختلف اگنے کے طریقے ہوتے ہیں۔
+ * **گندم:** گندم کو 20-25 سینٹی میٹر کی گہرائی پر اگایا جاتا ہے۔ اسے 10-15 سینٹی میٹر کی دوری پر بھیج
+2025-09-24 09:55:36,640 - INFO - Step 5: Converting text to speech...
+2025-09-24 09:55:52,023 - INFO - Audio file created: response.wav (919137 bytes)
+2025-09-24 09:55:52,024 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-24 12:55:45,097 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-24 12:55:45,097 - INFO - Input file: Sample3.wav
+2025-09-24 12:55:45,097 - INFO - Step 1: Converting speech to text...
+2025-09-24 12:55:49,764 - INFO - Transcribed text: வணக்கம். "என் தக்காளி இலைகளில் அடிப்பகுதியில் பழுப்பு நிற புள்ளிகள் தோன்றி அவற்றைச் சுற்றி மஞ்சள் நிற ஒளிவட்டங்கள் உள்ளன. இது என்ன நோய்? இதை நிறுத்த என்ன மருந்து போட வேண்டும்?"
+2025-09-24 12:55:49,765 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-24 12:55:49,765 - INFO - Step 3: Processing query with LLM...
+2025-09-24 12:55:50,995 - INFO - LLM response: வணக்கம். உங்கள் தக்காளி இலைகளில் பழுப்பு நிற புள்ளிகள் மற்றும் மஞ்சள் நிற ஒளிவட்டங்கள் தோன்றுவது தக்காளி பாதிரியா நோய் எனப்படும் பாக்டீரியா தொற்று ஆகும்.
+
+இந்த நோயை நிறுத்த பின்வரும் மருந்துகளைப் பயன்படுத்தலாம்:
+
+1. கார்பெண்டைமின் மருந்து (கார்பெண்டைமின் காப்பரசு என்றும் அழைக்கப்படுகிறது)
+2. மெட்டலாக்சில் மருந்து
+3. குளோரோதாலனில் மருந்து
+
+இந்த மருந்துகளை பின்வருமாறு பயன்படுத்தலாம்:
+
+-
+2025-09-24 12:55:50,996 - INFO - Step 5: Converting text to speech...
+2025-09-24 12:55:56,545 - INFO - Audio file created: response.wav (372028 bytes)
+2025-09-24 12:55:56,545 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-09-24 13:04:11,388 - INFO - AI-Powered Helpline Pipeline Started
+2025-09-24 13:04:11,388 - INFO - Input file: Sample5.wav
+2025-09-24 13:04:11,388 - INFO - Step 1: Converting speech to text...
+2025-09-24 13:04:15,210 - INFO - Transcribed text: हां जी, मुझे यह जानना था कि मैं चावल उगा रही हूं अपने खेत में और मुझे पानी का कितना मेजरमेंट रहेगा, कितने बाय स्क्वायर फीट के हिसाब से मुझे आप वह बताइए और मुझे पेस्टिसाइड्स जो है जो कि मेरी फसल को आगे खराब ना करें तो मुझे वह भी एक आप तीन चार पेस्टिसाइड्स के नाम और उसकी अमाउंट मुझे बता दीजिए।
+2025-09-24 13:04:15,210 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-09-24 13:04:15,210 - INFO - Step 3: Processing query with LLM...
+2025-09-24 13:04:19,226 - INFO - LLM response: चावल उगाने के लिए पानी का मेजरमेंट इस प्रकार है:
+
+- 1 से 2 फीट की उम्र तक: 5-6 सेंटीमीटर प्रति सप्ताह
+- 2 से 4 फीट की उम्र तक: 4-5 सेंटीमीटर प्रति सप्ताह
+- 4 से 6 फीट की उम्र तक: 3-4 सेंटीमीटर प्रति सप्ताह
+
+बाय स्क्वायर फीट के हिसाब से पानी का मेजरमेंट इस प्रकार है:
+
+- 1 से 2 फीट की उम्र तक: 1000 से 1500 लीटर प्रति एकड़ प्रति सप्ताह
+- 2 से 4 फीट की उम्र तक: 800 से 1200 लीटर प्रति एकड़ प्रति सप्ताह
+- 4 से 6 फीट की उम्र तक: 600 से 1000 लीटर प्रति एकड़ प्रति सप्ताह
+
+अब पेस्टिसाइड्स के बारे में बात करते हैं। यहाँ कुछ सुरक्षित और प्रभावी पेस्टिसाइड्स के नाम और उनकी अमाउंट हैं:
+
+1. **कार्बोफुरन** (500 ग्राम/हेक्टेयर)
+- यह पेस्टिसाइड फसल के कीटनाशक के रूप में उपयोग किया जाता है।
+- इसे 10-15 दिनों के अंतराल पर 2-3 बार छिड़काव करना चाहिए।
+
+2. **मेटालॉक्साम** (1.5 किलोग्राम/हेक्टेयर)
+- यह पेस्टिसाइड फसल के रोगनाशक के रूप में उपयोग किया जाता है।
+- इसे 10-15 दिनों के अंतराल पर 2-3 बार छिड़काव करना चाहिए।
+
+3. **मोनोक्रोटोफॉस** (1.5 किलोग्र
+2025-09-24 13:04:19,226 - INFO - Step 5: Converting text to speech...
+2025-09-24 13:04:34,843 - INFO - Audio file created: response.wav (1236368 bytes)
+2025-09-24 13:04:34,843 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav
+2025-11-30 14:43:18,230 - INFO - AI-Powered Helpline Pipeline Started
+2025-11-30 14:43:18,230 - INFO - Input file: Sample1.wav
+2025-11-30 14:43:18,230 - INFO - Step 1: Converting speech to text...
+2025-11-30 14:43:18,235 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-11-30 14:43:21,360 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/speech-to-text HTTP/1.1" 200 None
+2025-11-30 14:43:21,366 - INFO - Transcribed text: ਮੈਂ ਆਪਣੀ ਫਸਲ ਦੀ ਪੈਦਾਵਾਰ ਕਿਵੇਂ ਵਧਾ ਸਕਦਾ ਹਾਂ? ਮੈਂ ਸਤੰਬਰ ਦੌਰਾਨ ਅੰਮ੍ਰਿਤਸਰ ਵਿੱਚ ਕਣਕ ਉਗਾ ਰਿਹਾ ਹਾਂ।
+2025-11-30 14:43:21,366 - WARNING - Source language is 'auto'; skipping translation to English.
+2025-11-30 14:43:21,366 - INFO - Step 3: Processing query with LLM...
+2025-11-30 14:43:21,368 - DEBUG - Starting new HTTPS connection (1): api.groq.com:443
+2025-11-30 14:43:22,157 - DEBUG - https://api.groq.com:443 "POST /openai/v1/chat/completions HTTP/1.1" 200 None
+2025-11-30 14:43:22,158 - INFO - LLM response: ਸਤੰਬਰ ਦੌਰਾਨ ਅੰਮ੍ਰਿਤਸਰ ਵਿੱਚ ਕਣਕ ਉਗਾਉਣ ਲਈ ਕੁਝ ਸਲਾਹ ਇਹ ਹੈ:
+
+1. **ਪੌਸ਼ਟਿਕ ਧੁੱਪ ਪ੍ਰਦਾਨ ਕਰੋ**: ਕਣਕ ਲਈ 25-30°C ਦੀ ਧੁੱਪ ਚਾਹੀਦੀ ਹੈ। ਜੇ ਧੁੱਪ ਵੱਧ ਜਾਂਦੀ ਹੈ, ਤਾਂ ਕਣਕ ਦੀ ਪੈਦਾਵਾਰ ਘੱਟ ਹੋ ਸਕਦੀ ਹੈ।
+2. **ਸਮਰੱਥ ਪਾਣੀ ਪ੍ਰਦਾਨ ਕਰੋ**: ਕਣਕ ਲਈ 60-80 cm ਦੀ ਵਾਰਸ਼ਾ ਚਾਹੀਦੀ ਹੈ। ਜੇ ਪਾਣੀ ਦੀ ਘਾਟ ਹੋਵੇ, ਤਾਂ ਕਣਕ ਦੀ ਪੈਦਾਵਾਰ ਘੱਟ ਹੋ ਸਕਦੀ ਹੈ।
+3. **ਨਿਯਮਿਤ ਖੁਰਾਕ ਦੇਣ**: ਕਣਕ ਲਈ ਨਿਯਮਿਤ ਖੁਰਾਕ ਦੇਣ ਨਾਲ
+2025-11-30 14:43:22,158 - INFO - Step 5: Converting text to speech...
+2025-11-30 14:43:24,237 - DEBUG - Starting new HTTPS connection (1): api.elevenlabs.io:443
+2025-11-30 14:43:31,036 - DEBUG - https://api.elevenlabs.io:443 "POST /v1/text-to-speech/iWNf11sz1GrUE4ppxTOL HTTP/1.1" 200 None
+2025-11-30 14:43:31,109 - INFO - Audio file created: response.wav (488639 bytes)
+2025-11-30 14:43:31,109 - INFO - Processing complete! Response saved to /Users/dakshjaitly/Desktop/Projects/Agrow/agrow/ai-helpline-pipeline/output/response.wav

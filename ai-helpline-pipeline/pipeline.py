@@ -2,11 +2,17 @@ import logging
 from dataclasses import dataclass
 from typing import Optional
 
-from .config import AppConfig, SUPPORTED_LANGUAGES, validate_language_code
-# Assuming you have an elevenlabs_client now
-from .api_clients.elevenlabs_client import ElevenLabsClient
-from .api_clients.sarvam_client import SarvamClient
-from .api_clients.groq_client import GroqClient
+# Handle both package and direct imports
+try:
+    from .config import AppConfig, SUPPORTED_LANGUAGES, validate_language_code
+    from .api_clients.elevenlabs_client import ElevenLabsClient
+    from .api_clients.sarvam_client import SarvamClient
+    from .api_clients.groq_client import GroqClient
+except ImportError:
+    from config import AppConfig, SUPPORTED_LANGUAGES, validate_language_code
+    from api_clients.elevenlabs_client import ElevenLabsClient
+    from api_clients.sarvam_client import SarvamClient
+    from api_clients.groq_client import GroqClient
 
 
 @dataclass

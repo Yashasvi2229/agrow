@@ -5,7 +5,10 @@ from typing import Optional
 
 import requests
 
-from ..config import AppConfig
+try:
+    from ..config import AppConfig
+except ImportError:
+    from config import AppConfig
 
 
 DEFAULT_TIMEOUT = 60  # Increased timeout for potentially long audio files

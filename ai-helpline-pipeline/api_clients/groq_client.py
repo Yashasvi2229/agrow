@@ -3,7 +3,10 @@ from typing import Dict, List, Optional
 
 import requests
 
-from ..config import AppConfig
+try:
+    from ..config import AppConfig
+except ImportError:
+    from config import AppConfig
 
 
 DEFAULT_TIMEOUT = 60
