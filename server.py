@@ -122,14 +122,7 @@ def handle_recording():
         return str(response), 200, {'Content-Type': 'text/xml'}
     
     try:
-        # Tell caller we're processing
-        response.say(
-            "Processing your question. Please wait.",
-            voice="Polly.Aditi",
-            language="en-IN"
-        )
-        
-        # Download the recording
+        # Download the recording immediately
         logger.info("Downloading recording from Twilio...")
         audio_data = download_twilio_recording(recording_url)
         
