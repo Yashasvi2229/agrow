@@ -96,7 +96,7 @@ def incoming_call():
 def handle_recording():
     """
     Handle the recorded audio from Twilio.
-    Download the recording, process through pipeline, and return TwiML to play response.
+    Immediately return TwiML with hold message, then process in background.
     """
     logger.info("Recording received from Twilio")
     
@@ -121,8 +121,40 @@ def handle_recording():
         response.say("Sorry, the service is currently unavailable. Please try again later.")
         return str(response), 200, {'Content-Type': 'text/xml'}
     
+    # IMMEDIATELY start processing in background (don't wait)
+    import threading
+    processing_thread = threading.Thread(
+        target=process_audio_background,
+        args=(recording_url, call_sid)
+    )
+    processing_thread.daemon = True
+    processing_thread.start()
+    
+    # Return TwiML immediately with hold message and fast polling
+    response.say(
+        "Thank you. We are processing your question. Please hold.",
+        voice="Polly.Aditi",
+        language="en-IN"
+    )
+    
+    # Use pause instead of music for faster polling
+    # Pause for 5 seconds, then check if response is ready
+    response.pause(length=5)
+    
+    # Redirect to check if processing is done (will check every 5 seconds)
+    # Use absolute URL for Twilio redirect to work properly
+    base_url = request.url_root.rstrip('/')
+    response.redirect(f"{base_url}/voice/get-response/{call_sid}", method="GET")
+    
+    return str(response), 200, {'Content-Type': 'text/xml'}
+
+
+def process_audio_background(recording_url: str, call_sid: str):
+    """Process audio in background thread"""
     try:
-        # Download the recording immediately
+        logger.info("Background processing started for " + call_sid)
+        
+        # Download the recording
         logger.info("Downloading recording from Twilio...")
         audio_data = download_twilio_recording(recording_url)
         
@@ -136,7 +168,7 @@ def handle_recording():
         logger.info("Processing through AI pipeline...")
         result = pipeline.process_audio(
             audio_path=str(input_audio_path),
-            source_lang="auto",  # Auto-detect language
+            source_lang="auto",
             target_lang="en"
         )
         
@@ -146,35 +178,53 @@ def handle_recording():
             f.write(result.output_audio_bytes)
         logger.info(f"Response saved to {output_audio_path}")
         
-        # Generate public URL for the audio file
-        # For local dev, you'll need ngrok or similar
+        # Clean up temp file
+        input_audio_path.unlink(missing_ok=True)
+        
+        logger.info(f"Background processing complete for {call_sid}")
+        
+    except Exception as e:
+        logger.error(f"Error in background processing: {e}", exc_info=True)
+
+
+@app.route("/voice/get-response/<call_sid>", methods=["GET", "POST"])
+def get_response(call_sid):
+    """Check if response is ready and play it"""
+    response = VoiceResponse()
+    
+    # Check if response audio exists
+    output_audio_path = OUTPUT_DIR / f"{call_sid}_response.wav"
+    
+    if output_audio_path.exists():
+        # Response is ready! Play it
         base_url = request.url_root.rstrip('/')
         audio_url = f"{base_url}/audio/{call_sid}_response.wav"
         
         logger.info(f"Playing response audio: {audio_url}")
-        
-        # Play the response audio
         response.play(audio_url)
         
-        # Thank the caller
         response.say(
             "Thank you for using Agrow. Have a great day!",
             voice="Polly.Aditi",
             language="en-IN"
         )
-        
-        # Clean up temp file
-        input_audio_path.unlink(missing_ok=True)
-        
-    except Exception as e:
-        logger.error(f"Error processing call: {e}", exc_info=True)
+    else:
+        # Still processing, pause and check again
+        logger.info(f"Response not ready yet for {call_sid}, continuing to wait")
         response.say(
-            "Sorry, we encountered an error processing your question. Please try again.",
+            "Still processing. Please continue to hold.",
             voice="Polly.Aditi",
             language="en-IN"
         )
+        # Pause for 5 seconds then check again
+        response.pause(length=5)
+        # Use absolute URL for redirect
+        base_url = request.url_root.rstrip('/')
+        response.redirect(f"{base_url}/voice/get-response/{call_sid}", method="GET")
     
-    return str(response), 200, {'Content-Type': 'text/xml'}
+    twiml_str = str(response)
+    logger.info(f"Returning TwiML: {twiml_str[:200]}...")  # Log first 200 chars
+    return twiml_str, 200, {'Content-Type': 'text/xml'}
 
 
 @app.route("/audio/<filename>", methods=["GET"])
@@ -189,8 +239,10 @@ def serve_audio(filename):
         with open(audio_path, "rb") as f:
             audio_data = f.read()
         
+        # ElevenLabs returns MP3 format despite .wav extension
+        # Set correct Content-Type for Twilio
         return audio_data, 200, {
-            'Content-Type': 'audio/wav',
+            'Content-Type': 'audio/mpeg',
             'Content-Disposition': f'inline; filename="{filename}"'
         }
     except Exception as e:
