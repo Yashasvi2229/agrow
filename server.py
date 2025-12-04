@@ -48,6 +48,176 @@ OUTPUT_DIR = Path("output_audio")
 TEMP_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
+# In-memory storage for call language preferences
+# In production, use Redis or database
+call_language_map = {}
+
+# India STD code → Language mapping for phone-based language detection
+# Maps area codes to primary languages spoken in those regions
+STD_TO_LANGUAGE = {
+    # Hindi belt (North India)
+    "11": "hi",    # Delhi
+    "120": "hi",   # Noida
+    "121": "hi",   # Faridabad
+    "124": "hi",   # Gurgaon
+    "141": "hi",   # Jaipur
+    "145": "hi",   # Ajmer
+    "161": "hi",   # Ludhiana
+    "172": "pa",   # Chandigarh (Punjabi)
+    "181": "pa",   # Jammu
+    "191": "hi",   # UP - Meerut
+    "522": "hi",   # Lucknow
+    "512": "hi",   # Kanpur
+    "542": "hi",   # Varanasi
+    "562": "hi",   # Agra
+    "571": "hi",   # Aligarh
+    "612": "hi",   # Patna
+    "651": "hi",   # Ranchi
+    
+    # Marathi (Maharashtra)
+    "22": "mr",    # Mumbai
+    "20": "mr",    # Pune
+    "212": "mr",   # Aurangabad
+    "231": "mr",   # Nagpur
+    "251": "mr",   # Nashik
+    
+    # Tamil (Tamil Nadu)
+    "44": "ta",    # Chennai
+    "422": "ta",   # Coimbatore
+    "427": "ta",   # Salem
+    "452": "ta",   # Madurai
+    "462": "ta",   # Tiruchirapalli
+    
+    # Telugu (Telangana & Andhra Pradesh) 
+    "40": "te",    # Hyderabad
+    "863": "te",   # Vijayawada
+    "891": "te",   # Visakhapatnam
+    "866": "te",   # Guntur
+    
+    # Kannada (Karnataka)
+    "80": "kn",    # Bangalore
+    "821": "kn",   # Mysore
+    "824": "kn",   # Mangalore
+    "836": "kn",   # Belgaum
+    
+    # Bengali (West Bengal)
+    "33": "bn",    # Kolkata
+    "341": "bn",   # Siliguri
+    "353": "bn",   # Durgapur
+    
+    # Gujarati (Gujarat)
+    "79": "gu",    # Ahmedabad
+    "261": "gu",   # Surat
+    "265": "gu",   # Vadodara
+    "281": "gu",   # Rajkot
+}
+
+# Multi-language prompts for TwiML messages
+LANGUAGE_PROMPTS = {
+    "hi": {  # Hindi
+        "welcome": "आग्रो में आपका स्वागत है। यह किसानों के लिए AI-संचालित कृषि हेल्पलाइन है। कृपया बीप के बाद अपना सवाल किसी भी भारतीय भाषा में पूछें।",
+        "processing": "आपके प्रश्न की प्रक्रिया की जा रही है। कृपया प्रतीक्षा करें।",
+        "still_processing": "अभी भी प्रक्रिया जारी है। कृपया धैर्य रखें।",
+        "thank_you": "आग्रो का उपयोग करने के लिए धन्यवाद। अच्छा दिन हो!",
+        "error": "क्षमा करें, आपके प्रश्न को संसाधित करने में त्रुटि हुई। कृपया पुनः प्रयास करें।"
+    },
+    "ta": {  # Tamil
+        "welcome": "அக்ரோவுக்கு வரவேற்கிறோம். இது விவசாயிகளுக்கான AI-இயக்கப்படும் வேளாண் உதவி எண். பீப் ஒலிக்குப் பிறகு உங்கள் கேள்வியை எந்த இந்திய மொழியிலும் கேட்கவும்.",
+        "processing": "உங்கள் கேள்வி செயலாக்கப்படுகிறது. தயவுசெய்து காத்திருக்கவும்.",
+        "still_processing": "இன்னும் செயலாக்கம் தொடர்கிறது. தயவுசெய்து பொறுமையாக இருங்கள்.",
+        "thank_you": "அக்ரோவைப் பயன்படுத்தியதற்கு நன்றி. நல்ல நாள்!",
+        "error": "மன்னிக்கவும், உங்கள் கேள்வியை செயலாக்குவதில் பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயற்சிக்கவும்."
+    },
+    "te": {  # Telugu
+        "welcome": "అగ్రోకు స్వాగతం. ఇది రైతుల కోసం AI-ఆధారిత వ్యవసాయ హెల్ప్‌లైన్. బీప్ తర్వాత మీ ప్రశ్నను ఏ భారతీయ భాషలోనైనా అడగండి.",
+        "processing": "మీ ప్రశ్న ప్రాసెస్ అవుతోంది. దయచేసి వేచి ఉండండి.",
+        "still_processing": "ఇంకా ప్రాసెసింగ్ కొనసాగుతోంది. దయచేసి ఓపిక పట్టండి.",
+        "thank_you": "అగ్రో ఉపయోగించినందుకు ధన్యవాదాలు. మంచి రోజు!",
+        "error": "క్షమించండి, మీ ప్రశ్నను ప్రాసెస్ చేయడంలో లోపం ఉంది. దయచేసి మళ్లీ ప్రయత్నించండి."
+    },
+    "kn": {  # Kannada
+        "welcome": "ಅಗ್ರೋಗೆ ಸ್ವಾಗತ. ಇದು ರೈತರಿಗಾಗಿ AI-ಚಾಲಿತ ಕೃಷಿ ಸಹಾಯವಾಣಿ. ಬೀಪ್ ನಂತರ ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಯಾವುದೇ ಭಾರತೀಯ ಭಾಷೆಯಲ್ಲಿ ಕೇಳಿ.",
+        "processing": "ನಿಮ್ಮ ಪ್ರಶ್ನೆ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿದೆ. ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ.",
+        "still_processing": "ಇನ್ನೂ ಪ್ರಕ್ರಿಯೆ ಮುಂದುವರಿಯುತ್ತಿದೆ. ದಯವಿಟ್ಟು ತಾಳ್ಮೆ ಇರಿಸಿ.",
+        "thank_you": "ಅಗ್ರೋ ಬಳಸಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು. ಶುಭ ದಿನ!",
+        "error": "ಕ್ಷಮಿಸಿ, ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವಲ್ಲಿ ದೋಷವಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."
+    },
+    "mr": {  # Marathi
+        "welcome": "अॅग्रोमध्ये आपले स्वागत आहे. ही शेतकऱ्यांसाठी AI-चालित कृषी हेल्पलाइन आहे. बीप नंतर कृपया आपला प्रश्न कोणत्याही भारतीय भाषेत विचारा.",
+        "processing": "आपल्या प्रश्नावर प्रक्रिया केली जात आहे. कृपया प्रतीक्षा करा.",
+        "still_processing": "अजूनही प्रक्रिया सुरू आहे. कृपया धीर धरा.",
+        "thank_you": "अॅग्रो वापरल्याबद्दल धन्यवाद. चांगला दिवस असो!",
+        "error": "माफ करा, आपला प्रश्न प्रक्रिया करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा."
+    },
+    "pa": {  # Punjabi
+        "welcome": "ਐਗਰੋ ਵਿੱਚ ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ। ਇਹ ਕਿਸਾਨਾਂ ਲਈ AI-ਸੰਚਾਲਿਤ ਖੇਤੀਬਾੜੀ ਹੈਲਪਲਾਈਨ ਹੈ। ਬੀਪ ਤੋਂ ਬਾਅਦ ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਸਵਾਲ ਕਿਸੇ ਵੀ ਭਾਰਤੀ ਭਾਸ਼ਾ ਵਿੱਚ ਪੁੱਛੋ।",
+        "processing": "ਤੁਹਾਡੇ ਸਵਾਲ ਦੀ ਪ੍ਰਕ੍ਰਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ।",
+        "still_processing": "ਅਜੇ ਵੀ ਪ੍ਰਕ੍ਰਿਆ ਜਾਰੀ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਸਬਰ ਕਰੋ।",
+        "thank_you": "ਐਗਰੋ ਵਰਤਣ ਲਈ ਧੰਨਵਾਦ। ਚੰਗਾ ਦਿਨ!",
+        "error": "ਮਾਫ਼ ਕਰਨਾ, ਤੁਹਾਡੇ ਸਵਾਲ ਦੀ ਪ੍ਰਕ੍ਰਿਆ ਵਿੱਚ ਗਲਤੀ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+    },
+    "bn": {  # Bengali
+        "welcome": "অ্যাগ্রোতে আপনাকে স্বাগতম। এটি কৃষকদের জন্য AI-চালিত কৃষি হেল্পলাইন। বিপের পরে দয়া করে যেকোনো ভারতীয় ভাষায় আপনার প্রশ্ন জিজ্ঞাসা করুন।",
+        "processing": "আপনার প্রশ্ন প্রক্রিয়াধীন। দয়া করে অপেক্ষা করুন।",
+        "still_processing": "এখনও প্রক্রিয়া চলছে। দয়া করে ধৈর্য ধরুন।",
+        "thank_you": "অ্যাগ্রো ব্যবহার করার জন্য ধন্যবাদ। শুভ দিন!",
+        "error": "দুঃখিত, আপনার প্রশ্ন প্রক্রিয়া করতে ত্রুটি হয়েছে। দয়া করে পুনরায় চেষ্টা করুন।"
+    },
+    "gu": {  # Gujarati
+        "welcome": "એગ્રોમાં તમારું સ્વાગત છે. આ ખેડૂતો માટે AI-સંચાલિત કૃષિ હેલ્પલાઇન છે. બીપ પછી કૃપા કરીને કોઈપણ ભારતીય ભાષામાં તમારો પ્રશ્ન પૂછો.",
+        "processing": "તમારા પ્રશ્નની પ્રક્રિયા થઈ રહી છે. કૃપા કરીને રાહ જુઓ.",
+        "still_processing": "હજુ પણ પ્રક્રિયા ચાલુ છે. કૃપા કરીને ધીરજ રાખો.",
+        "thank_you": "એગ્રો વાપરવા બદલ આભાર. સારો દિવસ!",
+        "error": "માફ કરશો, તમારા પ્રશ્નની પ્રક્રિયામાં ભૂલ આવી. કૃપા કરીને ફરી પ્રયાસ કરો."
+    },
+    "en": {  # English (fallback)
+        "welcome": "Welcome to Agrow, the AI-powered agricultural helpline for farmers. Please ask your question in any Indian language after the beep.",
+        "processing": "Processing your question. Please wait.",
+        "still_processing": "Still processing. Please continue to hold.",
+        "thank_you": "Thank you for using Agrow. Have a great day!",
+        "error": "Sorry, we encountered an error processing your question. Please try again."
+    }
+}
+
+def detect_language_from_phone(phone_number: str) -> str:
+    """
+    Detect language from Indian phone number based on STD code.
+    
+    Args:
+        phone_number: Phone number in format +91XXXXXXXXXX
+        
+    Returns:
+        Language code (hi, ta, te, etc.). Defaults to 'hi' if not found.
+    """
+    try:
+        # Remove +91 country code
+        if phone_number.startswith("+91"):
+            phone_number = phone_number[3:]
+        elif phone_number.startswith("91"):
+            phone_number = phone_number[2:]
+        
+        # Try 3-digit STD code first
+        std_code_3 = phone_number[:3]
+        if std_code_3 in STD_TO_LANGUAGE:
+            lang = STD_TO_LANGUAGE[std_code_3]
+            logger.info(f"Detected language '{lang}' from STD code {std_code_3}")
+            return lang
+        
+        # Try 2-digit STD code
+        std_code_2 = phone_number[:2]
+        if std_code_2 in STD_TO_LANGUAGE:
+            lang = STD_TO_LANGUAGE[std_code_2]
+            logger.info(f"Detected language '{lang}' from STD code {std_code_2}")
+            return lang
+        
+        # Default to Hindi if no match
+        logger.info(f"No STD code match for {phone_number[:4]}, defaulting to Hindi")
+        return "hi"
+        
+    except Exception as e:
+        logger.error(f"Error detecting language from phone: {e}")
+        return "hi"  # Safe fallback
+
 
 @app.route("/health", methods=["GET"])
 def health_check():
@@ -62,33 +232,59 @@ def health_check():
 def incoming_call():
     """
     Handle incoming Twilio voice calls.
-    This endpoint returns TwiML to record the caller's question.
+    Detect caller's language from phone number and greet in their language.
     """
     logger.info("Incoming call received")
     
+    # Get caller's phone number and Call SID
+    caller_number = request.form.get('From', '')
+    call_sid = request.form.get('CallSid', '')
+    logger.info(f"Call from: {caller_number}, CallSid: {call_sid}")
+    
+    # Detect language from phone number
+    detected_lang = detect_language_from_phone(caller_number)
+    
+    # Store language preference for this call
+    call_language_map[call_sid] = detected_lang
+    
+    # Get prompts for detected language
+    prompts = LANGUAGE_PROMPTS.get(detected_lang, LANGUAGE_PROMPTS["en"])
+    
     response = VoiceResponse()
     
-    # Greet the caller
+    # Twilio language codes for Polly voices
+    twilio_lang_map = {
+        "hi": "hi-IN",
+        "ta": "ta-IN",
+        "te": "te-IN",
+        "kn": "kn-IN",
+        "mr": "mr-IN",
+        "pa": "pa-IN",
+        "bn": "bn-IN",
+        "gu": "gu-IN",
+        "en": "en-IN"
+    }
+    
+    twilio_lang = twilio_lang_map.get(detected_lang, "hi-IN")
+    
+    # Greet the caller in their language
     response.say(
-        "Welcome to Agrow, the AI-powered agricultural helpline for farmers. "
-        "Please ask your question in any Indian language after the beep.",
-        voice="Polly.Aditi",  # Indian English voice
-        language="en-IN"
+        prompts["welcome"],
+        voice="Polly.Aditi",  # Indian voice - supports multiple Indic languages
+        language=twilio_lang
     )
     
     # Record the caller's question
-    # maxLength=30 means 30 seconds max recording
-    # action= is where Twilio will POST the recording URL
     response.record(
         max_length=30,
         action="/voice/recording",
         method="POST",
         play_beep=True,
-        timeout=3,  # Stop recording after 3 seconds of silence
+        timeout=3,
         transcribe=False
     )
     
-    logger.info("Sent TwiML to record caller's question")
+    logger.info(f"Sent TwiML in language '{detected_lang}' to record caller's question")
     return str(response), 200, {'Content-Type': 'text/xml'}
 
 
@@ -104,10 +300,20 @@ def handle_recording():
     recording_url = request.form.get("RecordingUrl")
     call_sid = request.form.get("CallSid")
     
+    # Get stored language for this call (default to Hindi)
+    detected_lang = call_language_map.get(call_sid, "hi")
+    prompts = LANGUAGE_PROMPTS.get(detected_lang, LANGUAGE_PROMPTS["hi"])
+    
+    twilio_lang_map = {
+        "hi": "hi-IN", "ta": "ta-IN", "te": "te-IN", "kn": "kn-IN",
+        "mr": "mr-IN", "pa": "pa-IN", "bn": "bn-IN", "gu": "gu-IN", "en": "en-IN"
+    }
+    twilio_lang = twilio_lang_map.get(detected_lang, "hi-IN")
+    
     if not recording_url:
         logger.error("No recording URL provided")
         response = VoiceResponse()
-        response.say("Sorry, we couldn't receive your question. Please try again.")
+        response.say(prompts["error"], voice="Polly.Aditi", language=twilio_lang)
         return str(response), 200, {'Content-Type': 'text/xml'}
     
     logger.info(f"Call SID: {call_sid}")
@@ -118,7 +324,7 @@ def handle_recording():
     # Check if pipeline is ready
     if pipeline is None:
         logger.error("Pipeline not initialized")
-        response.say("Sorry, the service is currently unavailable. Please try again later.")
+        response.say(prompts["error"], voice="Polly.Aditi", language=twilio_lang)
         return str(response), 200, {'Content-Type': 'text/xml'}
     
     # IMMEDIATELY start processing in background (don't wait)
@@ -130,11 +336,11 @@ def handle_recording():
     processing_thread.daemon = True
     processing_thread.start()
     
-    # Return TwiML immediately with hold message and fast polling
+    # Return TwiML immediately with hold message in caller's language
     response.say(
-        "Thank you. We are processing your question. Please hold.",
+        prompts["processing"],
         voice="Polly.Aditi",
-        language="en-IN"
+        language=twilio_lang
     )
     
     # Use pause instead of music for faster polling
@@ -192,6 +398,16 @@ def get_response(call_sid):
     """Check if response is ready and play it"""
     response = VoiceResponse()
     
+    # Get stored language for this call (default to Hindi)
+    detected_lang = call_language_map.get(call_sid, "hi")
+    prompts = LANGUAGE_PROMPTS.get(detected_lang, LANGUAGE_PROMPTS["hi"])
+    
+    twilio_lang_map = {
+        "hi": "hi-IN", "ta": "ta-IN", "te": "te-IN", "kn": "kn-IN",
+        "mr": "mr-IN", "pa": "pa-IN", "bn": "bn-IN", "gu": "gu-IN", "en": "en-IN"
+    }
+    twilio_lang = twilio_lang_map.get(detected_lang, "hi-IN")
+    
     # Check if response audio exists
     output_audio_path = OUTPUT_DIR / f"{call_sid}_response.wav"
     
@@ -203,18 +419,24 @@ def get_response(call_sid):
         logger.info(f"Playing response audio: {audio_url}")
         response.play(audio_url)
         
+        # Thank you message in caller's language
         response.say(
-            "Thank you for using Agrow. Have a great day!",
+            prompts["thank_you"],
             voice="Polly.Aditi",
-            language="en-IN"
+            language=twilio_lang
         )
+        
+        # Clean up language mapping for this call
+        call_language_map.pop(call_sid, None)
     else:
         # Still processing, pause and check again
         logger.info(f"Response not ready yet for {call_sid}, continuing to wait")
+        
+        # Status message in caller's language
         response.say(
-            "Still processing. Please continue to hold.",
+            prompts["still_processing"],
             voice="Polly.Aditi",
-            language="en-IN"
+            language=twilio_lang
         )
         # Pause for 5 seconds then check again
         response.pause(length=5)
