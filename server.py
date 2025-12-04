@@ -360,6 +360,10 @@ def process_audio_background(recording_url: str, call_sid: str):
     try:
         logger.info("Background processing started for " + call_sid)
         
+        # Get phone-detected language for this call (if available)
+        phone_detected_lang = call_language_map.get(call_sid, "hi")
+        logger.info(f"Phone-detected language for {call_sid}: {phone_detected_lang}")
+        
         # Download the recording
         logger.info("Downloading recording from Twilio...")
         audio_data = download_twilio_recording(recording_url)
@@ -370,12 +374,13 @@ def process_audio_background(recording_url: str, call_sid: str):
             f.write(audio_data)
         logger.info(f"Recording saved to {input_audio_path}")
         
-        # Process through pipeline
+        # Process through pipeline with phone language hint
         logger.info("Processing through AI pipeline...")
         result = pipeline.process_audio(
             audio_path=str(input_audio_path),
             source_lang="auto",
-            target_lang="en"
+            target_lang="en",
+            phone_detected_lang=phone_detected_lang  # Pass language hint from phone
         )
         
         # Save output audio
