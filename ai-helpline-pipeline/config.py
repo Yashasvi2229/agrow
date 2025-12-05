@@ -10,6 +10,7 @@ class ServiceEndpoints:
 	elevenlabs_base_url: str = os.getenv("ELEVENLABS_BASE_URL", "https://api.elevenlabs.io/v1")
 	sarvam_base_url: str = os.getenv("SARVAM_BASE_URL", "https://api.sarvam.ai/v1")
 	groq_base_url: str = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
+	google_tts_base_url: str = os.getenv("GOOGLE_TTS_BASE_URL", "https://texttospeech.googleapis.com/v1")
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,7 @@ class AppConfig:
 	elevenlabs_api_key: Optional[str] = os.getenv("ELEVENLABS_API_KEY")
 	sarvam_api_key: Optional[str] = os.getenv("SARVAM_API_KEY")
 	groq_api_key: Optional[str] = os.getenv("GROQ_API_KEY")
+	google_tts_api_key: Optional[str] = os.getenv("GOOGLE_TTS_API_KEY")
 
 	# Optional
 	log_level: str = os.getenv("LOG_LEVEL", "INFO")
@@ -82,6 +84,8 @@ def load_config() -> AppConfig:
 		missing.append("SARVAM_API_KEY")
 	if not config.groq_api_key:
 		missing.append("GROQ_API_KEY")
+	if not config.google_tts_api_key:
+		missing.append("GOOGLE_TTS_API_KEY")
 	if missing:
 		raised = ", ".join(missing)
 		raise RuntimeError(f"Missing required environment variables: {raised}. Create a .env and set keys.")

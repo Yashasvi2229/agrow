@@ -8,11 +8,13 @@ try:
     from .api_clients.elevenlabs_client import ElevenLabsClient
     from .api_clients.sarvam_client import SarvamClient
     from .api_clients.groq_client import GroqClient
+    from .api_clients.google_tts_client import GoogleTTSClient
 except ImportError:
     from config import AppConfig, SUPPORTED_LANGUAGES, validate_language_code
     from api_clients.elevenlabs_client import ElevenLabsClient
     from api_clients.sarvam_client import SarvamClient
     from api_clients.groq_client import GroqClient
+    from api_clients.google_tts_client import GoogleTTSClient
 
 
 @dataclass
@@ -32,8 +34,10 @@ class HelplinePipeline:
 	def __init__(self, config: AppConfig, logger: Optional[logging.Logger] = None):
 		self.config = config
 		self.logger = logger or logging.getLogger(__name__)
-		# Use the new ElevenLabsClient
-		self.speech = ElevenLabsClient(config)
+		# Use ElevenLabs for STT (fast and accurate)
+		self.speech_stt = ElevenLabsClient(config)
+		# Use Google TTS for text-to-speech (faster than ElevenLabs)
+		self.speech_tts = GoogleTTSClient(config)
 		self.sarvam = SarvamClient(config)
 		self.grog = GroqClient(config)
 
@@ -89,7 +93,7 @@ class HelplinePipeline:
 			raise ValueError(f"Unsupported target_lang: {target_lang}")
 
 		self.logger.info("Step 1: Converting speech to text...")
-		stt = self.speech.speech_to_text(audio_path, source_lang=source_lang)
+		stt = self.speech_stt.speech_to_text(audio_path, source_lang=source_lang)
 		self.logger.info("Transcribed text: %s", stt.text)
 
 		# Step 2: Validate and determine effective language
@@ -144,7 +148,10 @@ class HelplinePipeline:
 		self.logger.info("Step 3: Processing query with LLM...")
 		system_prompt = (
 			"You are a helpful agricultural helpline assistant for Indian farmers. "
-			"Provide practical, safe, and region-agnostic advice. Keep answers concise."
+			"Provide practical, safe, and region-agnostic advice. "
+			"Keep answers very concise - maximum 2 short sentences. "
+			"Speak naturally for a phone call. Do not use any special formatting like asterisks, "
+			"underscores, bullet points, or markdown symbols. Be direct and conversational."
 		)
 		llm_response_en = self.grog.chat(system_prompt=system_prompt, user_prompt=query_for_llm)
 		self.logger.info("LLM response: %s", llm_response_en)
@@ -161,8 +168,8 @@ class HelplinePipeline:
 			final_text = back.translated_text
 			self.logger.info("Final translated response: %s", final_text)
 
-		self.logger.info("Step 5: Converting text to speech...")
-		audio_bytes = self.speech.text_to_speech(final_text, target_lang=effective_source)
+		self.logger.info("Step 5: Converting text to speech with Google TTS...")
+		audio_bytes = self.speech_tts.text_to_speech(final_text, target_lang=effective_source)
 
 		return PipelineResult(
 			input_language=effective_source,
