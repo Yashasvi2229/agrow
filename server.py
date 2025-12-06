@@ -1,12 +1,16 @@
 import os
 import sys
 import logging
+import threading
 from pathlib import Path
 from flask import Flask, request, jsonify
-from twilio.twiml.voice_response import VoiceResponse
+from twilio.twiml.voice_response import VoiceResponse, Gather, Redirect
 from twilio.request_validator import RequestValidator
 import requests
 from dotenv import load_dotenv
+
+# Import conversation state management
+from conversation_state import conversations, create_session, get_session, end_session
 
 # Add ai-helpline-pipeline to Python path
 sys.path.insert(0, str(Path(__file__).parent / "ai-helpline-pipeline"))
@@ -51,6 +55,9 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # In-memory storage for call language preferences
 # In production, use Redis or database
 call_language_map = {}
+
+# Storage for Twilio's SpeechResult (better quality than ElevenLabs for follow-ups)
+twilio_transcriptions = {}
 
 # India STD code → Language mapping for phone-based language detection
 # Maps area codes to primary languages spoken in those regions
@@ -119,63 +126,81 @@ LANGUAGE_PROMPTS = {
         "processing": "आपके प्रश्न की प्रक्रिया की जा रही है। कृपया प्रतीक्षा करें।",
         "still_processing": "अभी भी प्रक्रिया जारी है। कृपया धैर्य रखें।",
         "thank_you": "एग्रोवाइज़ का उपयोग करने के लिए धन्यवाद। अच्छा दिन हो!",
-        "error": "क्षमा करें, आपके प्रश्न को संसाधित करने में त्रुटि हुई। कृपया पुनः प्रयास करें।"
+        "error": "क्षमा करें, आपके प्रश्न को संसाधित करने में त्रुटि हुई। कृपया पुनः प्रयास करें।",
+        "another_question": "क्या आपका कोई और सवाल है?",
+        "still_there": "क्या आप अभी भी वहाँ हैं? कोई और सवाल है?"
     },
     "ta": {  # Tamil
         "welcome": "அக்ரோவைஸுக்கு வரவேற்கிறோம். இது விவசாயிகளுக்கான AI-இயக்கப்படும் வேளாண் உதவி எண். பீப் ஒலிக்குப் பிறகு உங்கள் கேள்வியை எந்த இந்திய மொழியிலும் கேட்கவும்.",
         "processing": "உங்கள் கேள்வி செயலாக்கப்படுகிறது. தயவுசெய்து காத்திருக்கவும்.",
         "still_processing": "இன்னும் செயலாக்கம் தொடர்கிறது. தயவுசெய்து பொறுமையாக இருங்கள்.",
         "thank_you": "அக்ரோவைஸைப் பயன்படுத்தியதற்கு நன்றி. நல்ல நாள்!",
-        "error": "மன்னிக்கவும், உங்கள் கேள்வியை செயலாக்குவதில் பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயற்சிக்கவும்."
+        "error": "மன்னிக்கவும், உங்கள் கேள்வியை செயலாக்குவதில் பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+        "another_question": "வேறு கேள்வி உள்ளதா?",
+        "still_there": "நீங்கள் இன்னும் இருக்கிறீர்களா? வேறு கேள்வி உள்ளதா?"
     },
     "te": {  # Telugu
         "welcome": "ఆగ్రోవైజ్‌కు స్వాగతం. ఇది రైతుల కోసం AI-ఆధారిత వ్యవసాయ హెల్ప్‌లైన్. బీప్ తర్వాత మీ ప్రశ్నను ఏ భారతీయ భాషలోనైనా అడగండి.",
         "processing": "మీ ప్రశ్న ప్రాసెస్ అవుతోంది. దయచేసి వేచి ఉండండి.",
         "still_processing": "ఇంకా ప్రాసెసింగ్ కొనసాగుతోంది. దయచేసి ఓపిక పట్టండి.",
-        "thank_you": "ఆగ్రోవైజ్ ఉపయోగించినందుకు ధన్యవాదాలు. మంచి రోజు!",
-        "error": "క్షమించండి, మీ ప్రశ్నను ప్రాసెస్ చేయడంలో లోపం ఉంది. దయచేసి మళ్లీ ప్రయత్నించండి."
+        "thank_you": "ఆగ్రోవైజ్ ఉపయోగించినందుకు ధన్యవాదాలు. మంచి రో జు!",
+        "error": "క్షమించండి, మీ ప్రశ్నను ప్రాసెస్ చేయడంలో లోపం ఉంది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+        "another_question": "మరో ప్రశ్న ఉందా?",
+        "still_there": "మీరు ఇంకా ఇక్కడ ఉన్నారా? మరో ప్రశ్న ఉందా?"
     },
     "kn": {  # Kannada
         "welcome": "ಆಗ್ರೋವೈಸ್‌ಗೆ ಸ್ವಾಗತ. ಇದು ರೈತರಿಗಾಗಿ AI-ಚಾಲಿತ ಕೃಷಿ ಸಹಾಯವಾಣಿ. ಬೀಪ್ ನಂತರ ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಯಾವುದೇ ಭಾರತೀಯ ಭಾಷೆಯಲ್ಲಿ ಕೇಳಿ.",
         "processing": "ನಿಮ್ಮ ಪ್ರಶ್ನೆ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿದೆ. ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ.",
         "still_processing": "ಇನ್ನೂ ಪ್ರಕ್ರಿಯೆ ಮುಂದುವರಿಯುತ್ತಿದೆ. ದಯವಿಟ್ಟು ತಾಳ್ಮೆ ಇರಿಸಿ.",
         "thank_you": "ಆಗ್ರೋವೈಸ್ ಬಳಸಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು. ಶುಭ ದಿನ!",
-        "error": "ಕ್ಷಮಿಸಿ, ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವಲ್ಲಿ ದೋಷವಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."
+        "error": "ಕ್ಷಮಿಸಿ, ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವಲ್ಲಿ ದೋಷವಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
+        "another_question": "ಬೇರೆ ಪ್ರಶ್ನೆ ಇದೆಯಾ?",
+        "still_there": "ನೀವು ಇನ್ನೂ ಇದ್ದೀರಾ? ಬೇರೆ ಪ್ರಶ್ನೆ ಇದೆಯಾ?"
     },
     "mr": {  # Marathi
         "welcome": "एग्रोवाईझमध्ये आपले स्वागत आहे. ही शेतकऱ्यांसाठी AI-चालित कृषी हेल्पलाइन आहे. बीप नंतर कृपया आपला प्रश्न कोणत्याही भारतीय भाषेत विचारा.",
         "processing": "आपल्या प्रश्नावर प्रक्रिया केली जात आहे. कृपया प्रतीक्षा करा.",
         "still_processing": "अजूनही प्रक्रिया सुरू आहे. कृपया धीर धरा.",
         "thank_you": "एग्रोवाईझ वापरल्याबद्दल धन्यवाद. चांगला दिवस असो!",
-        "error": "माफ करा, आपला प्रश्न प्रक्रिया करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा."
+        "error": "माफ करा, आपला प्रश्न प्रक्रिया करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.",
+        "another_question": "आणखी काही प्रश्न आहे का?",
+        "still_there": "तुम्ही अजून तिथे आहात? आणखी काही प्रश्न आहे का?"
     },
     "pa": {  # Punjabi
         "welcome": "ਐਗਰੋਵਾਈਜ਼ ਵਿੱਚ ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ। ਇਹ ਕਿਸਾਨਾਂ ਲਈ AI-ਸੰਚਾਲਿਤ ਖੇਤੀਬਾੜੀ ਹੈਲਪਲਾਈਨ ਹੈ। ਬੀਪ ਤੋਂ ਬਾਅਦ ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਸਵਾਲ ਕਿਸੇ ਵੀ ਭਾਰਤੀ ਭਾਸ਼ਾ ਵਿੱਚ ਪੁੱਛੋ।",
         "processing": "ਤੁਹਾਡੇ ਸਵਾਲ ਦੀ ਪ੍ਰਕ੍ਰਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ।",
         "still_processing": "ਅਜੇ ਵੀ ਪ੍ਰਕ੍ਰਿਆ ਜਾਰੀ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਸਬਰ ਕਰੋ।",
         "thank_you": "ਐਗਰੋਵਾਈਜ਼ ਵਰਤਣ ਲਈ ਧੰਨਵਾਦ। ਚੰਗਾ ਦਿਨ!",
-        "error": "ਮਾਫ਼ ਕਰਨਾ, ਤੁਹਾਡੇ ਸਵਾਲ ਦੀ ਪ੍ਰਕ੍ਰਿਆ ਵਿੱਚ ਗਲਤੀ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+        "error": "ਮਾਫ਼ ਕਰਨਾ, ਤੁਹਾਡੇ ਸਵਾਲ ਦੀ ਪ੍ਰਕ੍ਰਿਆ ਵਿੱਚ ਗਲਤੀ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+        "another_question": "ਕੀ ਕੋਈ ਹੋਰ ਸਵਾਲ ਹੈ?",
+        "still_there": "ਕੀ ਤੁਸੀਂ ਅਜੇ ਵੀ ਹੋ? ਕੋਈ ਹੋਰ ਸਵਾਲ ਹੈ?"
     },
     "bn": {  # Bengali
         "welcome": "অ্যাগ্রোওয়াইজ-এ আপনাকে স্বাগতম। এটি কৃষকদের জন্য AI-চালিত কৃষি হেল্পলাইন। বিপের পরে দয়া করে যেকোনো ভারতীয় ভাষায় আপনার প্রশ্ন জিজ্ঞাসা করুন।",
         "processing": "আপনার প্রশ্ন প্রক্রিয়াধীন। দয়া করে অপেক্ষা করুন।",
         "still_processing": "এখনও প্রক্রিয়া চলছে। দয়া করে ধৈর্য ধরুন।",
         "thank_you": "অ্যাগ্রোওয়াইজ ব্যবহার করার জন্য ধন্যবাদ। শুভ দিন!",
-        "error": "দুঃখিত, আপনার প্রশ্ন প্রক্রিয়া করতে ত্রুটি হয়েছে। দয়া করে পুনরায় চেষ্টা করুন।"
+        "error": "দুঃখিত, আপনার প্রশ্ন প্রক্রিয়া করতে ত্রুটি হয়েছে। দয়া করে পুনরায় চেষ্টা করুন।",
+        "another_question": "আর কোনো প্রশ্ন আছে?",
+        "still_there": "আপনি কি এখনও আছেন? আর কোনো প্রশ্ন আছে?"
     },
     "gu": {  # Gujarati
         "welcome": "એગ્રોવાઇઝમાં તમારું સ્વાગત છે. આ ખેડૂતો માટે AI-સંચાલિત કૃષિ હેલ્પલાઇન છે. બીપ પછી કૃપા કરીને કોઈપણ ભારતીય ભાષામાં તમારો પ્રશ્ન પૂછો.",
         "processing": "તમારા પ્રશ્નની પ્રક્રિયા થઈ રહી છે. કૃપા કરીને રાહ જુઓ.",
         "still_processing": "હજુ પણ પ્રક્રિયા ચાલુ છે. કૃપા કરીને ધીરજ રાખો.",
         "thank_you": "એગ્રોવાઇઝ વાપરવા બદલ આભાર. સારો દિવસ!",
-        "error": "માફ કરશો, તમારા પ્રશ્નની પ્રક્રિયામાં ભૂલ આવી. કૃપા કરીને ફરી પ્રયાસ કરો."
+        "error": "માફ કરશો, તમારા પ્રશ્નની પ્રક્રિયામાં ભૂલ આવી. કૃપા કરીને ફરી પ્રયાસ કરો.",
+        "another_question": "કોઈ અન્ય પ્રશ્ન છે?",
+        "still_there": "તમે અજે પણ ત્યાં છો? કોઈ અન્ય પ્રશ્ન છે?"
     },
     "en": {  # English (fallback)
         "welcome": "Welcome to AgroWise, the AI-powered agricultural helpline for farmers. Please ask your question in any Indian language after the beep.",
         "processing": "Processing your question. Please wait.",
         "still_processing": "Still processing. Please continue to hold.",
         "thank_you": "Thank you for using AgroWise. Have a great day!",
-        "error": "Sorry, we encountered an error processing your question. Please try again."
+        "error": "Sorry, we encountered an error processing your question. Please try again.",
+        "another_question": "Do you have another question?",
+        "still_there": "Are you still there? Do you have another question?"
     }
 }
 
@@ -219,6 +244,112 @@ def detect_language_from_phone(phone_number: str) -> str:
         return "hi"  # Safe fallback
 
 
+def get_twilio_lang(detected_lang: str) -> str:
+    """
+    Map our language codes to Twilio-compatible language codes with voice preferences.
+    
+    Args:
+        detected_lang: Our internal language code (hi, ta, te, etc.)
+        
+    Returns:
+        Twilio language code (e.g., 'hi-IN', 'ta-IN')
+    """
+    twilio_lang_map = {
+        "hi": "hi-IN",
+        "ta": "ta-IN",
+        "te": "te-IN",
+        "kn": "kn-IN",
+        "mr": "mr-IN",
+        "pa": "pa-IN",
+        "bn": "bn-IN",
+        "gu": "gu-IN",
+        "ml": "ml-IN",
+        "en": "en-IN"
+    }
+    return twilio_lang_map.get(detected_lang, "hi-IN")
+
+
+def check_exit_intent(speech_result: str, digits: str, detected_lang: str) -> bool:
+    """
+    Check if user wants to exit the conversation.
+    
+    Args:
+        speech_result: Transcribed speech from user
+        digits: DTMF digits pressed
+        detected_lang: Current conversation language
+        
+    Returns:
+        True if user wants to exit
+    """
+    # Exit keywords by language
+    exit_keywords = {
+        'en': ['bye', 'goodbye', 'thank you', 'thanks', 'no more', 'exit', 'end', 'hangup', 'hang up'],
+        'hi': ['धन्यवाद', 'अलविदा', 'नहीं', 'बस', 'ठीक है', 'रुको'],
+        'ta': ['நன்றி', 'போதும்', 'வேண்டாம்'],
+        'te': ['ధన్యవాదాలు', 'చాలు', 'వద్దు'],
+        'kn': ['ಧನ್ಯವಾದಗಳು', 'ಸಾಕು'],
+        'mr': ['धन्यवाद', 'पुरे', 'नको'],
+        'pa': ['ਧੰਨਵਾਦ', 'ਬਸ'],
+        'bn': ['ধন্যবাদ', 'থামুন'],
+        'gu': ['આભાર', 'બસ']
+    }
+    
+    # Check # key press
+    if digits == '#':
+        logger.info("User pressed # to exit")
+        return True
+    
+    # Check speech for exit keywords
+    speech_lower = speech_result.lower()
+    
+    # Check language-specific keywords
+    lang_keywords = exit_keywords.get(detected_lang, [])
+    if any(keyword in speech_result or keyword.lower() in speech_lower for keyword in lang_keywords):
+        logger.info(f"Exit keyword detected in {detected_lang}: {speech_result}")
+        return True
+    
+    # Always check English keywords (fallback)
+    if any(keyword in speech_lower for keyword in exit_keywords['en']):
+        logger.info(f"Exit keyword detected (English): {speech_result}")
+        return True
+    
+    return False
+
+
+def end_conversation_route(call_sid: str, detected_lang: str) -> tuple:
+    """
+    End conversation gracefully with goodbye message.
+    
+    Args:
+        call_sid: Twilio Call SID
+        detected_lang: Language for goodbye message
+        
+    Returns:
+        Tuple of (TwiML string, status code, headers)
+    """
+    prompts = LANGUAGE_PROMPTS.get(detected_lang, LANGUAGE_PROMPTS["hi"])
+    twilio_lang = get_twilio_lang(detected_lang)
+    
+    response = VoiceResponse()
+    response.say(
+        prompts["thank_you"],
+        voice="Polly.Aditi",
+        language=twilio_lang
+    )
+    response.hangup()
+    
+    # Cleanup
+    call_language_map.pop(call_sid, None)
+    summary = end_session(call_sid)
+    
+    # Log conversation summary (for future WhatsApp integration)
+    if summary:
+        logger.info(f"Conversation summary for {call_sid}:\n{summary}")
+    
+    return str(response), 200, {'Content-Type': 'text/xml'}
+
+
+
 @app.route("/health", methods=["GET"])
 def health_check():
     """Health check endpoint"""
@@ -233,6 +364,7 @@ def incoming_call():
     """
     Handle incoming Twilio voice calls.
     Detect caller's language from phone number and greet in their language.
+    Initialize conversation session for multi-turn dialog.
     """
     logger.info("Incoming call received")
     
@@ -247,25 +379,15 @@ def incoming_call():
     # Store language preference for this call
     call_language_map[call_sid] = detected_lang
     
+    # Initialize conversation session
+    create_session(call_sid, detected_lang, caller_number)
+    logger.info(f"Created conversation session for {call_sid}")
+    
     # Get prompts for detected language
     prompts = LANGUAGE_PROMPTS.get(detected_lang, LANGUAGE_PROMPTS["en"])
+    twilio_lang = get_twilio_lang(detected_lang)
     
     response = VoiceResponse()
-    
-    # Twilio language codes for Polly voices
-    twilio_lang_map = {
-        "hi": "hi-IN",
-        "ta": "ta-IN",
-        "te": "te-IN",
-        "kn": "kn-IN",
-        "mr": "mr-IN",
-        "pa": "pa-IN",
-        "bn": "bn-IN",
-        "gu": "gu-IN",
-        "en": "en-IN"
-    }
-    
-    twilio_lang = twilio_lang_map.get(detected_lang, "hi-IN")
     
     # Greet the caller in their language
     response.say(
@@ -274,18 +396,215 @@ def incoming_call():
         language=twilio_lang
     )
     
-    # Record the caller's question
+    # Record the caller's question (first turn)
     response.record(
         max_length=30,
-        action="/voice/recording",
+        action="/voice/process-turn",  # Changed to new endpoint for continuous conversation
         method="POST",
         play_beep=True,
-        timeout=3,
+        timeout=5,  # 5 seconds of silence ends recording
         transcribe=False
     )
     
     logger.info(f"Sent TwiML in language '{detected_lang}' to record caller's question")
     return str(response), 200, {'Content-Type': 'text/xml'}
+@app.route("/voice/process-turn", methods=["POST"])
+def process_turn():
+    """
+    Process a conversation turn and prepare to continue the dialog.
+    This endpoint handles each Q&A exchange in a continuous conversation.
+    """
+    recording_url = request.form.get("RecordingUrl")
+    call_sid = request.form.get("CallSid")
+    
+    # Get language and session
+    detected_lang = call_language_map.get(call_sid, "hi")
+    session = get_session(call_sid)
+    
+    if not recording_url or not session:
+        logger.warning(f"Missing recording URL or session for {call_sid}")
+        return end_conversation_route(call_sid, detected_lang)
+    
+    logger.info(f"Processing turn {session.get_turn_count() + 1} for {call_sid}")
+    
+    # Process in background (reuse existing process_audio_background)
+    import threading
+    processing_thread = threading.Thread(
+        target=process_audio_background,
+        args=(recording_url, call_sid)
+    )
+    processing_thread.daemon = True
+    processing_thread.start()
+    
+    # Return "processing" message and redirect to check response
+    prompts = LANGUAGE_PROMPTS.get(detected_lang, LANGUAGE_PROMPTS["hi"])
+    twilio_lang = get_twilio_lang(detected_lang)
+    
+    response = VoiceResponse()
+    response.say(prompts["processing"], voice="Polly.Aditi", language=twilio_lang)
+    response.pause(length=2)
+    
+    # Redirect to check if response is ready
+    base_url = request.url_root.rstrip('/')
+    response.redirect(f"{base_url}/voice/check-response/{call_sid}", method="GET")
+    
+    return str(response), 200, {'Content-Type': 'text/xml'}
+
+
+@app.route("/voice/check-response/<call_sid>", methods=["GET", "POST"])
+def check_response_continuous(call_sid):
+    """
+    Check if AI response is ready, then play with barge-in capability.
+    After playing response, ask if user has another question.
+    """
+    detected_lang = call_language_map.get(call_sid, "hi")
+    session = get_session(call_sid)
+    prompts = LANGUAGE_PROMPTS.get(detected_lang, LANGUAGE_PROMPTS["hi"])
+    twilio_lang = get_twilio_lang(detected_lang)
+    
+    response = VoiceResponse()
+    output_path = OUTPUT_DIR / f"{call_sid}_response.wav"
+    
+    if not output_path.exists():
+        # Still processing
+        logger.info(f"Response not ready yet for {call_sid}")
+        response.say(prompts["still_processing"], voice="Polly.Aditi", language=twilio_lang)
+        response.pause(length=3)
+        
+        # Redirect back to check again
+        base_url = request.url_root.rstrip('/')
+        response.redirect(f"{base_url}/voice/check-response/{call_sid}", method="GET")
+        return str(response), 200, {'Content-Type': 'text/xml'}
+    
+    # Response is ready! Play it with barge-in capability
+    base_url = request.url_root.rstrip('/')
+    audio_url = f"{base_url}/audio/{call_sid}_response.wav"
+    logger.info(f"Playing response audio: {audio_url}")
+    
+    # Use Gather to enable barge-in interrupts
+    gather = Gather(
+        input='speech dtmf',  # Accept speech or DTMF
+        action=f'/voice/handle-interrupt/{call_sid}',
+        method='POST',
+        timeout=30,  # Wait 30 seconds for user to ask next question
+        speech_timeout='auto',  # Auto-detect end of speech
+        hints='yes,no,bye,thank you,goodbye,okay,हाँ,नहीं,धन्यवाद',  # Speech hints
+        language=twilio_lang,
+        barge_in=True  # ⭐ INTERRUPT CAPABILITY - stops audio when user speaks
+    )
+    
+    # Play the AI response
+    gather.play(audio_url)
+    
+    # After audio, ask for next question
+    gather.say(
+        prompts.get("another_question", "Do you have another question?"),
+        voice="Polly.Aditi",
+        language=twilio_lang
+    )
+    
+    response.append(gather)
+    
+    # If no input after gather, redirect to prompt again
+    base_url = request.url_root.rstrip('/')
+    response.redirect(f"{base_url}/voice/prompt-next/{call_sid}", method="GET")
+    
+    return str(response), 200, {'Content-Type': 'text/xml'}
+
+
+@app.route("/voice/handle-interrupt/<call_sid>", methods=["POST"])
+def handle_interrupt(call_sid):
+    """
+    Handle user interrupt or continuation.
+    Check for exit intent or continue to next question.
+    """
+    speech_result = request.form.get("SpeechResult", "")
+    digits = request.form.get("Digits", "")
+    
+    detected_lang = call_language_map.get(call_sid, "hi")
+    session = get_session(call_sid)
+    
+    logger.info(f"Handle interrupt - Speech: '{speech_result}', Digits: '{digits}'")
+    
+    # Store Twilio's transcription (much better than ElevenLabs for follow-ups!)
+    if speech_result and len(speech_result.strip()) > 0:
+        twilio_transcriptions[call_sid] = speech_result
+        logger.info(f"Stored Twilio transcription for {call_sid}: '{speech_result}'")
+    
+    # Check for exit intent
+    if check_exit_intent(speech_result.lower(), digits, detected_lang):
+        logger.info(f"User wants to exit conversation {call_sid}")
+        return end_conversation_route(call_sid, detected_lang)
+    
+    # Check if max turns or time limit reached
+    if session and session.should_end():
+        logger.info(f"Session limits reached for {call_sid}")
+        return end_conversation_route(call_sid, detected_lang)
+    
+    # Continue conversation - record next question
+    prompts = LANGUAGE_PROMPTS.get(detected_lang, LANGUAGE_PROMPTS["hi"])
+    twilio_lang = get_twilio_lang(detected_lang)
+    
+    response = VoiceResponse()
+    
+    # Record next question
+    response.record(
+        max_length=30,
+        action="/voice/process-turn",  # Loop back to process turn
+        method="POST",
+        play_beep=False,  # No beep for continuation
+        timeout=5,
+        transcribe=False
+    )
+    
+    return str(response), 200, {'Content-Type': 'text/xml'}
+
+
+@app.route("/voice/prompt-next/<call_sid>", methods=["GET", "POST"])
+def prompt_next(call_sid):
+    """
+    Prompt user for next question after silence.
+    This is called if user didn't respond after the "another question?" prompt.
+    """
+    detected_lang = call_language_map.get(call_sid, "hi")
+    session = get_session(call_sid)
+    prompts = LANGUAGE_PROMPTS.get(detected_lang, LANGUAGE_PROMPTS["hi"])
+    twilio_lang = get_twilio_lang(detected_lang)
+    
+    logger.info(f"Prompting for next question  - {call_sid}")
+    
+    # If limits reached or no session, end gracefully
+    if not session or session.should_end():
+        logger.info(f"Ending conversation after timeout - {call_sid}")
+        return end_conversation_route(call_sid, detected_lang)
+    
+    response = VoiceResponse()
+    
+    # Gather with speech for next question
+    gather = Gather(
+        input='speech dtmf',
+        action=f'/voice/handle-interrupt/{call_sid}',
+        method='POST',
+        timeout=10,  # 10 seconds of silence
+        speech_timeout='auto',
+        hints='yes,no,bye,thank you',
+        language=twilio_lang
+    )
+    
+    gather.say(
+        prompts.get("still_there", "Are you still there? Do you have another question?"),
+        voice="Polly.Aditi",
+        language=twilio_lang
+    )
+    
+    response.append(gather)
+    
+    # After timeout, end call
+    logger.info(f"No response after second prompt, ending {call_sid}")
+    return end_conversation_route(call_sid, detected_lang)
+
+
+
 
 
 @app.route("/voice/recording", methods=["POST"])
@@ -356,13 +675,26 @@ def handle_recording():
 
 
 def process_audio_background(recording_url: str, call_sid: str):
-    """Process audio in background thread"""
+    """Process audio in background thread with conversation context"""
     try:
         logger.info("Background processing started for " + call_sid)
         
         # Get phone-detected language for this call (if available)
         phone_detected_lang = call_language_map.get(call_sid, "hi")
         logger.info(f"Phone-detected language for {call_sid}: {phone_detected_lang}")
+        
+        # Get conversation session for context
+        session = get_session(call_sid)
+        conversation_history = []
+        
+        if session:
+            # Build conversation history from previous turns
+            for turn in session.turns:
+                conversation_history.append({
+                    'question': turn.question,
+                    'answer': turn.answer
+                })
+            logger.info(f"Retrieved {len(conversation_history)} previous turns for context")
         
         # Download the recording
         logger.info("Downloading recording from Twilio...")
@@ -374,13 +706,20 @@ def process_audio_background(recording_url: str, call_sid: str):
             f.write(audio_data)
         logger.info(f"Recording saved to {input_audio_path}")
         
-        # Process through pipeline with phone language hint
+        # Check if we have Twilio's transcription (from Gather - much better quality!)
+        twilio_transcription = twilio_transcriptions.pop(call_sid, None)
+        if twilio_transcription:
+            logger.info(f"Using Twilio's transcription: '{twilio_transcription}'")
+        
+        # Process through pipeline with phone language hint AND conversation history
         logger.info("Processing through AI pipeline...")
         result = pipeline.process_audio(
             audio_path=str(input_audio_path),
             source_lang="auto",
             target_lang="en",
-            phone_detected_lang=phone_detected_lang  # Pass language hint from phone
+            phone_detected_lang=phone_detected_lang,  # Pass language hint from phone
+            conversation_history=conversation_history,  # Pass conversation context
+            pre_transcribed_text=twilio_transcription  # Use Twilio's transcription if available!
         )
         
         # Save output audio
@@ -388,6 +727,17 @@ def process_audio_background(recording_url: str, call_sid: str):
         with open(output_audio_path, "wb") as f:
             f.write(result.output_audio_bytes)
         logger.info(f"Response saved to {output_audio_path}")
+        
+        # Store this Q&A turn in the conversation session (only if transcription valid)
+        # IMPORTANT: Store ENGLISH versions so LLM sees English context and responds in English!
+        if session and result.is_valid_transcription:
+            session.add_turn(
+                question=result.translated_query or result.transcribed_text,  # English question
+                answer=result.llm_response_en  # English answer
+            )
+            logger.info(f"Stored turn #{session.get_turn_count()} in conversation session (English versions)")
+        elif session and not result.is_valid_transcription:
+            logger.warning(f"Skipped storing turn due to invalid transcription - asked user to repeat")
         
         # Clean up temp file
         input_audio_path.unlink(missing_ok=True)
