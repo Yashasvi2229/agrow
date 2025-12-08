@@ -40,6 +40,7 @@ class AppConfig:
 	sarvam_api_key: Optional[str] = os.getenv("SARVAM_API_KEY")
 	groq_api_key: Optional[str] = os.getenv("GROQ_API_KEY")
 	google_tts_api_key: Optional[str] = os.getenv("GOOGLE_TTS_API_KEY")
+	deepgram_api_key: Optional[str] = os.getenv("DEEPGRAM_API_KEY")
 
 	# Optional
 	log_level: str = os.getenv("LOG_LEVEL", "INFO")
@@ -86,6 +87,8 @@ def load_config() -> AppConfig:
 		missing.append("GROQ_API_KEY")
 	if not config.google_tts_api_key:
 		missing.append("GOOGLE_TTS_API_KEY")
+	if not config.deepgram_api_key:
+		missing.append("DEEPGRAM_API_KEY")
 	if missing:
 		raised = ", ".join(missing)
 		raise RuntimeError(f"Missing required environment variables: {raised}. Create a .env and set keys.")

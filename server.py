@@ -442,7 +442,7 @@ def process_turn():
     
     response = VoiceResponse()
     response.say(prompts["processing"], voice="Polly.Aditi", language=twilio_lang)
-    response.pause(length=2)
+    response.pause(length=15)  # Increased from 2s to 15s - wait longer before first check
     
     # Redirect to check if response is ready
     base_url = request.url_root.rstrip('/')
@@ -469,7 +469,7 @@ def check_response_continuous(call_sid):
         # Still processing
         logger.info(f"Response not ready yet for {call_sid}")
         response.say(prompts["still_processing"], voice="Polly.Aditi", language=twilio_lang)
-        response.pause(length=3)
+        response.pause(length=8)  # Increased from 3s to 8s - reduce check frequency
         
         # Redirect back to check again
         base_url = request.url_root.rstrip('/')
@@ -706,12 +706,27 @@ def process_audio_background(recording_url: str, call_sid: str):
             f.write(audio_data)
         logger.info(f"Recording saved to {input_audio_path}")
         
-        # Check if we have Twilio's transcription (from Gather - much better quality!)
+        # ⭐ HYBRID STT APPROACH ⭐
+        # First question: Use Deepgram (automatic language detection)
+        # Follow-up questions: Use Twilio's transcription from Gather (faster)
+        #
+        # Check if we have Twilio's transcription (from Gather in follow-up questions)
         twilio_transcription = twilio_transcriptions.pop(call_sid, None)
         if twilio_transcription:
-            logger.info(f"Using Twilio's transcription: '{twilio_transcription}'")
+            logger.info(f"✓ Using Twilio's transcription (follow-up question): '{twilio_transcription}'")
+            logger.info(f"✓ Pipeline will use pre-transcribed text (skip Deepgram for speed)")
+        else:
+            logger.info(f"✓ No Twilio transcription found (first question)")
+            logger.info(f"✓ Pipeline will use Deepgram for automatic language detection")
         
         # Process through pipeline with phone language hint AND conversation history
+        # The pipeline will:
+        # 1. If twilio_transcription is None: Use Deepgram STT with automatic language detection
+        # 2. If twilio_transcription exists: Skip STT, use provided text
+        # 3. Apply smart language detection (Unicode script, phone hint, multi-layer fallback)
+        # 4. Translate to English if needed
+        # 5. Get LLM response
+        # 6. Translate back and generate TTS
         logger.info("Processing through AI pipeline...")
         result = pipeline.process_audio(
             audio_path=str(input_audio_path),
@@ -719,7 +734,7 @@ def process_audio_background(recording_url: str, call_sid: str):
             target_lang="en",
             phone_detected_lang=phone_detected_lang,  # Pass language hint from phone
             conversation_history=conversation_history,  # Pass conversation context
-            pre_transcribed_text=twilio_transcription  # Use Twilio's transcription if available!
+            pre_transcribed_text=twilio_transcription  # None for first Q (→ Deepgram), text for follow-ups (→ skip STT)
         )
         
         # Save output audio

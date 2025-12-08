@@ -6,13 +6,13 @@ from typing import Optional
 # Handle both package and direct imports
 try:
     from .config import AppConfig, SUPPORTED_LANGUAGES, validate_language_code
-    from .api_clients.elevenlabs_client import ElevenLabsClient
+    from .api_clients.deepgram_client import DeepgramClient
     from .api_clients.sarvam_client import SarvamClient
     from .api_clients.groq_client import GroqClient
     from .api_clients.google_tts_client import GoogleTTSClient
 except ImportError:
     from config import AppConfig, SUPPORTED_LANGUAGES, validate_language_code
-    from api_clients.elevenlabs_client import ElevenLabsClient
+    from api_clients.deepgram_client import DeepgramClient
     from api_clients.sarvam_client import SarvamClient
     from api_clients.groq_client import GroqClient
     from api_clients.google_tts_client import GoogleTTSClient
@@ -36,9 +36,9 @@ class HelplinePipeline:
 	def __init__(self, config: AppConfig, logger: Optional[logging.Logger] = None):
 		self.config = config
 		self.logger = logger or logging.getLogger(__name__)
-		# Use ElevenLabs for STT (fast and accurate)
-		self.speech_stt = ElevenLabsClient(config)
-		# Use Google TTS for text-to-speech (faster than ElevenLabs)
+		# Use Deepgram for STT (automatic language detection + fast)
+		self.speech_stt = DeepgramClient(config)
+		# Use Google TTS for text-to-speech (faster than Deepgram)
 		self.speech_tts = GoogleTTSClient(config)
 		self.sarvam = SarvamClient(config)
 		self.grog = GroqClient(config)
@@ -48,7 +48,7 @@ class HelplinePipeline:
 		Validate transcription quality to detect gibberish.
 		
 		TEMPORARILY DISABLED - Always returns True to allow continuous conversation
-		despite ElevenLabs STT quality issues.
+		despite Deepgram STT quality issues.
 		
 		Returns:
 			True (validation disabled)
@@ -67,8 +67,8 @@ class HelplinePipeline:
 		# 	self.logger.warning(f"Transcription too short: '{text}'")
 		# 	return False
 		# 
-		# # Check 2: Specific ElevenLabs error patterns
-		# elevenlabs_errors = [
+		# # Check 2: Specific Deepgram error patterns
+		# Deepgram_errors = [
 		# 	'(white noise)',
 		# 	'(silence)',
 		# 	'(blank)',
@@ -82,9 +82,9 @@ class HelplinePipeline:
 		# ]
 		# 
 		# text_lower = text_stripped.lower()
-		# for error in elevenlabs_errors:
+		# for error in Deepgram_errors:
 		# 	if error in text_lower:
-		# 		self.logger.warning(f"Detected ElevenLabs error pattern: '{text}'")
+		# 		self.logger.warning(f"Detected Deepgram error pattern: '{text}'")
 		# 		return False
 		# 
 		# self.logger.info(f"Transcription validation passed: '{text[:50]}...'")
@@ -136,14 +136,14 @@ class HelplinePipeline:
 		target_lang: str = "en",
 		phone_detected_lang: Optional[str] = None,  # NEW: Language hint from phone number
 		conversation_history: Optional[list] = None,  # NEW: Previous Q&A for context
-		pre_transcribed_text: Optional[str] = None,  # NEW: Use Twilio's transcription instead of ElevenLabs
+		pre_transcribed_text: Optional[str] = None,  # NEW: Use Twilio's transcription instead of Deepgram
 	) -> PipelineResult:
 		if not validate_language_code(source_lang):
 			raise ValueError(f"Unsupported source language: {source_lang}")
 		if not validate_language_code(target_lang) and target_lang != "en":
 			raise ValueError(f"Unsupported target_lang: {target_lang}")
 
-		# Step 1: Get transcription (use Twilio's if available, otherwise ElevenLabs)
+		# Step 1: Get transcription (use Twilio's if available, otherwise Deepgram)
 		if pre_transcribed_text:
 			self.logger.info(f"Using pre-transcribed text from Twilio: {pre_transcribed_text}")
 			# Create a simple object with text and language attributes
@@ -153,10 +153,32 @@ class HelplinePipeline:
 					self.language = language
 			stt = STTResult(text=pre_transcribed_text, language=phone_detected_lang or "auto")
 		else:
-			self.logger.info("Step 1: Converting speech to text via ElevenLabs...")
+			self.logger.info("Step 1: Converting speech to text via Deepgram...")
 			stt = self.speech_stt.speech_to_text(audio_path, source_lang=source_lang)
 		
 		self.logger.info("Transcribed text: %s", stt.text)
+
+		# Check for silence detection from Deepgram
+		if stt.text == "[SILENCE_DETECTED]":
+			self.logger.warning("Deepgram detected silence or inaudible audio - asking user to repeat")
+			# Treat as invalid transcription and ask user to repeat
+			retry_lang = phone_detected_lang or "hi"
+			retry_messages = {
+				"hi": "क्षमा करें, मुझे आपकी आवाज़ साफ नहीं सुनाई दी। कृपया अपना सवाल दोहराएं।",
+				"en": "Sorry, I couldn't hear you clearly. Please repeat your question."
+			}
+			retry_message = retry_messages.get(retry_lang, retry_messages["hi"])
+			retry_audio = self.speech_tts.text_to_speech(retry_message, target_lang=retry_lang)
+			
+			return PipelineResult(
+				input_language=retry_lang,
+				transcribed_text="[SILENCE]",
+				translated_query=None,
+				llm_response_en="[RETRY_NEEDED]",
+				final_text=retry_message,
+				output_audio_bytes=retry_audio,
+				is_valid_transcription=False
+			)
 
 		# Validate transcription quality
 		if not self._is_valid_transcription(stt.text):
