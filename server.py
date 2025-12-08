@@ -19,6 +19,10 @@ sys.path.insert(0, str(Path(__file__).parent / "ai-helpline-pipeline"))
 from pipeline import HelplinePipeline
 from config import load_config
 
+# Import WhatsApp client for sending summaries
+sys.path.insert(0, str(Path(__file__).parent / "ai-helpline-pipeline" / "api_clients"))
+from whatsapp_client import send_summary_via_whatsapp
+
 # Load environment variables
 load_dotenv()
 
@@ -338,13 +342,41 @@ def end_conversation_route(call_sid: str, detected_lang: str) -> tuple:
     )
     response.hangup()
     
-    # Cleanup
+    # Get session before cleanup
+    session = get_session(call_sid)
+    caller_number = session.caller_number if session else None
+    
+    # Cleanup and get summary
     call_language_map.pop(call_sid, None)
     summary = end_session(call_sid)
     
-    # Log conversation summary (for future WhatsApp integration)
+    # Log conversation summary
     if summary:
         logger.info(f"Conversation summary for {call_sid}:\n{summary}")
+        
+        # Send WhatsApp summary in background (non-blocking)
+        if caller_number:
+            def send_whatsapp_background():
+                try:
+                    logger.info(f"Sending WhatsApp summary to {caller_number} in {detected_lang}")
+                    success = send_summary_via_whatsapp(
+                        caller_number=caller_number,
+                        summary=summary,
+                        language=detected_lang
+                    )
+                    if success:
+                        logger.info(f"✅ WhatsApp summary delivered to {caller_number}")
+                    else:
+                        logger.error(f"❌ Failed to send WhatsApp summary to {caller_number}")
+                except Exception as e:
+                    logger.error(f"Error sending WhatsApp summary: {e}", exc_info=True)
+            
+            # Send in background thread to not block call completion
+            whatsapp_thread = threading.Thread(target=send_whatsapp_background)
+            whatsapp_thread.daemon = True
+            whatsapp_thread.start()
+        else:
+            logger.warning("No caller number available, cannot send WhatsApp summary")
     
     return str(response), 200, {'Content-Type': 'text/xml'}
 
@@ -397,17 +429,41 @@ def incoming_call():
     )
     
     # Record the caller's question (first turn)
+    # Enable transcription to bypass ElevenLabs STT (which is blocked at hackathon)
     response.record(
         max_length=30,
-        action="/voice/process-turn",  # Changed to new endpoint for continuous conversation
+        action="/voice/process-turn",
         method="POST",
         play_beep=True,
         timeout=5,  # 5 seconds of silence ends recording
-        transcribe=False
+        transcribe=True,  # Use Twilio's transcription instead of ElevenLabs
+        transcribe_callback="/voice/transcription-callback"  # Callback for transcription
     )
     
     logger.info(f"Sent TwiML in language '{detected_lang}' to record caller's question")
     return str(response), 200, {'Content-Type': 'text/xml'}
+
+
+@app.route("/voice/transcription-callback", methods=["POST"])
+def transcription_callback():
+    """
+    Handle Twilio's transcription callback.
+    Store the transcription for use in the pipeline (bypasses ElevenLabs STT).
+    """
+    call_sid = request.form.get("CallSid")
+    transcription_text = request.form.get("TranscriptionText", "")
+    
+    if call_sid and transcription_text:
+        # Store Twilio's transcription for this call
+        twilio_transcriptions[call_sid] = transcription_text
+        logger.info(f"📝 Received Twilio transcription for {call_sid}: '{transcription_text}'")
+    else:
+        logger.warning(f"Incomplete transcription callback: CallSid={call_sid}, Text={transcription_text}")
+    
+    # Return empty response (Twilio doesn't expect TwiML from this endpoint)
+    return "", 200
+
+
 @app.route("/voice/process-turn", methods=["POST"])
 def process_turn():
     """
@@ -554,7 +610,8 @@ def handle_interrupt(call_sid):
         method="POST",
         play_beep=False,  # No beep for continuation
         timeout=5,
-        transcribe=False
+        transcribe=True,  # Enable Twilio transcription
+        transcribe_callback="/voice/transcription-callback"
     )
     
     return str(response), 200, {'Content-Type': 'text/xml'}
